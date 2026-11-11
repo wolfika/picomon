@@ -17,6 +17,30 @@ Metrics come straight from `/proc` and `/sys`. The last few minutes are kept in 
 
 ## Install
 
+Each [release](https://github.com/wolfika/picomon/releases) has static binaries for x86_64, aarch64 (64-bit Raspberry Pi OS) and armv7 (32-bit Raspberry Pi OS). They have no dependencies and run on any distribution.
+
+```sh
+ARCH=$(uname -m | sed 's/armv7l/armv7/')
+curl -fLO https://github.com/wolfika/picomon/releases/latest/download/picomon-linux-$ARCH
+sudo install -m755 picomon-linux-$ARCH /usr/local/bin/picomon
+picomon --print-config | sudo install -Dm600 /dev/stdin /etc/picomon/config.toml
+picomon --print-service | sudo tee /etc/systemd/system/picomon.service >/dev/null
+sudo systemctl enable --now picomon
+```
+
+The dashboard is served at `http://<host>:7340`.
+
+The service reads `/etc/picomon/config.toml`, so the file must exist even when every key is left at its default.
+
+To verify the download, fetch the checksums from the same release:
+
+```sh
+curl -fLO https://github.com/wolfika/picomon/releases/latest/download/SHA256SUMS
+sha256sum -c --ignore-missing SHA256SUMS
+```
+
+### Build from source
+
 Build requirements: stable Rust and [Bun](https://bun.sh).
 
 ```sh
@@ -25,21 +49,22 @@ sudo make install          # binary, systemd unit, /etc/picomon/config.toml
 sudo systemctl enable --now picomon
 ```
 
-Run `make build` as the user that has Rust and Bun installed. `make install` only copies the built files and does not need either toolchain.
-
-The dashboard is served at `http://<host>:7340`.
-
-`make install` copies the example config only if `/etc/picomon/config.toml` does not already exist.
+Run `make build` as the user that has Rust and Bun installed. `make install` only copies the built files and does not need either toolchain. It copies the example config only if `/etc/picomon/config.toml` does not already exist.
 
 ## Update
 
 ```sh
-git pull
-make build
-sudo make install
-sudo systemctl daemon-reload       # picks up changes to the unit file
+ARCH=$(uname -m | sed 's/armv7l/armv7/')
+curl -fLO https://github.com/wolfika/picomon/releases/latest/download/picomon-linux-$ARCH
+sudo install -m755 picomon-linux-$ARCH /usr/local/bin/picomon
+picomon --print-service | sudo tee /etc/systemd/system/picomon.service >/dev/null
+sudo systemctl daemon-reload
 sudo systemctl restart picomon
 ```
+
+Regenerating the unit picks up any changes to it in the new version. The config file is left as it is.
+
+From source, replace the first three lines with `git pull`, `make build` and `sudo make install`.
 
 If the service fails to start, `journalctl -u picomon -n 20` shows why. A config key that the new version no longer accepts is named there. Compare with `picomon --print-config`.
 
