@@ -83,3 +83,7 @@ Layout:
 - `src/hub.rs`: collector thread, history ring buffer, broadcast
 - `src/server.rs`: HTTP routes, SSE, auth, embedded frontend
 - `web/`: Svelte 5 frontend, built into `web/dist` and embedded at compile time
+
+## License
+
+MIT. See [LICENSE](LICENSE).
