@@ -1,6 +1,6 @@
-# Checks for pull requests. The release workflow also calls this before
-# release-please, so pushes to main are checked once and a release is only
-# cut from a commit that passed.
+# Checks for pull requests, including the release PRs that release-please
+# opens. The release workflow also calls this before release-please, so pushes
+# to main are checked once and a release is only cut from a commit that passed.
 
 name: CI
 

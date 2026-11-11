@@ -4,8 +4,10 @@
 # release, and the jobs below then attach smoke-tested static binaries and
 # checksums to it.
 #
-# Everything runs in this one workflow because a tag or release created with
-# GITHUB_TOKEN does not trigger other workflows.
+# The build jobs live in this workflow because they need release-please's
+# outputs: whether this push cut a release, and its tag. This avoids depending
+# on whether GitHub starts a separate workflow for a tag that this workflow's
+# GITHUB_TOKEN created.
 
 name: Release
 
