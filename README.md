@@ -1,5 +1,9 @@
 # Picomon
 
+[![CI](https://img.shields.io/github/actions/workflow/status/wolfika/picomon/release.yml?branch=main&label=CI)](https://github.com/wolfika/picomon/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/wolfika/picomon)](https://github.com/wolfika/picomon/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 Lightweight self-hosted monitor for a single Linux server, with a web dashboard. One binary, about 1.3 MB, using about 3 MB of RAM. Low resource footprint, ideal for personal servers, such as a Raspberry Pi.
 
 ![Picomon dashboard on a Raspberry Pi, showing CPU, temperature, memory, network and storage cards in the glass theme](docs/screenshot.png)
