@@ -65,7 +65,12 @@ The sensor is detected from hwmon (`coretemp`, `k10temp`, `zenpower`, `cpu_therm
 
 ### Themes
 
-`theme.preset` selects a built-in theme. `glass` is the default. `[theme.colors]` overrides any theme variable; keys are CSS variable names without the leading `--`:
+`theme.preset` selects a built-in theme:
+
+- `glass` (default), `dark`, `light`, `nord`
+- `catppuccin-latte`, `catppuccin-frappe`, `catppuccin-macchiato`, `catppuccin-mocha`, using the [Catppuccin](https://catppuccin.com) palette
+
+`[theme.colors]` overrides any theme variable; keys are CSS variable names without the leading `--`:
 
 | Variable                                        | Used for                                                          |
 | ----------------------------------------------- | ----------------------------------------------------------------- |
@@ -75,6 +80,7 @@ The sensor is detected from hwmon (`coretemp`, `k10temp`, `zenpower`, `cpu_therm
 | `text`, `muted`, `faint`                        | Text, from strongest to weakest                                   |
 | `grid`, `tooltip`                               | Chart gridlines, tooltip and menu background                      |
 | `accent`                                        | Brand mark and focus rings                                        |
+| `on-accent`                                     | Line drawn on `accent` in the brand mark; white when unset        |
 | `cpu`, `mem`                                    | CPU and memory gauges and charts                                  |
 | `series-1`, `series-2`                          | Download/upload and read/write; `series-1` also fills disk meters |
 | `ok`, `warn`, `crit`                            | Status colours, including the temperature gauge                   |
