@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::ffi::CString;
 use std::path::Path;
 
@@ -62,10 +62,19 @@ fn mounts() -> Vec<Mount> {
         .collect()
 }
 
-/// Picks physical filesystems, keeping one mount point per device (the shortest).
+/// Drops mounts hidden by a later mount at the same path. Only the last entry
+/// for a path is visible, and statvfs on that path reports that entry.
+fn visible(all: Vec<Mount>) -> Vec<Mount> {
+    let mut seen = HashSet::new();
+    let mut out: Vec<Mount> = all.into_iter().rev().filter(|m| seen.insert(m.mount.clone())).collect();
+    out.reverse();
+    out
+}
+
+/// Picks visible physical filesystems, keeping one mount point per device (the shortest).
 fn auto_select(all: Vec<Mount>) -> Vec<Mount> {
     let mut picked: Vec<Mount> = Vec::new();
-    for m in all.into_iter().filter(|m| PHYSICAL_FS.contains(&m.fs.as_str())) {
+    for m in visible(all).into_iter().filter(|m| PHYSICAL_FS.contains(&m.fs.as_str())) {
         match picked.iter_mut().find(|p| p.device == m.device) {
             Some(p) if m.mount.len() < p.mount.len() => *p = m,
             Some(_) => {}
@@ -96,8 +105,10 @@ pub fn usage(configured: &[String]) -> Vec<Disk> {
     let selected: Vec<Mount> = if configured.is_empty() {
         auto_select(all)
     } else {
+        let mut seen = HashSet::new();
         configured
             .iter()
+            .filter(|path| seen.insert(path.as_str()))
             .map(|path| {
                 // The last matching entry is the one currently visible at that path.
                 all.iter().rev().find(|m| &m.mount == path).map_or_else(
@@ -212,5 +223,23 @@ mod tests {
         // From then on sdb is counted normally.
         let later = stats(110, Some(1_000_002));
         assert_eq!(io_delta(&after, &later), (2 * 512, 2 * 512));
+    }
+
+    #[test]
+    fn over_mounted_path_appears_once() {
+        let got = auto_select(vec![
+            m("/dev/sda1", "/", "ext4"),
+            m("/dev/sdb1", "/mnt", "ext4"),
+            m("/dev/sdc1", "/mnt", "xfs"),
+        ]);
+        let pairs: Vec<(&str, &str)> = got.iter().map(|m| (m.device.as_str(), m.mount.as_str())).collect();
+        assert_eq!(pairs, [("/dev/sda1", "/"), ("/dev/sdc1", "/mnt")]);
+    }
+
+    #[test]
+    fn hidden_by_non_physical_mount() {
+        // A tmpfs over /data hides the disk; statvfs("/data") would report the tmpfs.
+        let got = auto_select(vec![m("/dev/sdb1", "/data", "ext4"), m("tmpfs", "/data", "tmpfs")]);
+        assert!(got.is_empty());
     }
 }
