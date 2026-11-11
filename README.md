@@ -95,13 +95,6 @@ make dev     # backend on :7340, Vite with hot reload on :5173
 make test    # Rust tests and Svelte type check
 ```
 
-Layout:
-
-- `src/collect/`: metric readers, one file per subsystem
-- `src/hub.rs`: collector thread, history ring buffer, broadcast
-- `src/server.rs`: HTTP routes, SSE, auth, embedded frontend
-- `web/`: Svelte 5 frontend, built into `web/dist` and embedded at compile time
-
 ## License
 
 MIT. See [LICENSE](LICENSE).
