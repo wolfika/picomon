@@ -12,7 +12,9 @@
 <section class="card {klass}">
   <header>
     <h2>{title}</h2>
-    {#if aside}<span class="aside" title={aside}>{aside}</span>{/if}
+    {#if aside}
+      <span class="aside" title={aside}>{aside}</span>
+    {/if}
   </header>
   {@render children()}
 </section>

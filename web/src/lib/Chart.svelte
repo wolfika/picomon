@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Point } from './types';
   import { clock } from './format';
+  import type { Point } from './types';
 
   type Key = Exclude<keyof Point, 't'>;
   interface Series {
@@ -45,7 +45,8 @@
   const top = $derived.by(() => {
     if (max !== undefined) return max;
     let m = 0;
-    for (const p of points) for (const s of series) m = Math.max(m, (p[s.key] as number | null) ?? 0);
+    for (const p of points)
+      for (const s of series) m = Math.max(m, (p[s.key] as number | null) ?? 0);
     // Headroom so the peak does not touch the top edge.
     return m > 0 ? m * 1.15 : 1;
   });
@@ -99,68 +100,88 @@
 </script>
 
 <div class="wrap">
-<div class="chart" bind:clientWidth={width} style:height="{height}px">
-  {#if width > 0}
-    <!-- Focusable so keyboard users can step through values with the arrow keys. -->
-    <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
-    <svg
-      {width}
-      {height}
-      role="img"
-      aria-label="{label}, last {points.length} samples. Use arrow keys to inspect values."
-      tabindex="0"
-      onpointermove={onMove}
-      onpointerleave={() => (hover = null)}
-      onfocus={() => (hover = points.length - 1)}
-      onblur={() => (hover = null)}
-      onkeydown={onKey}
-    >
-      <defs>
+  <div class="chart" bind:clientWidth={width} style:height="{height}px">
+    {#if width > 0}
+      <!-- Focusable so keyboard users can step through values with the arrow keys. -->
+      <!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
+      <!-- biome-ignore-start lint/a11y/noNoninteractiveTabindex: focusable so keyboard users can inspect values -->
+      <svg
+        {width}
+        {height}
+        role="img"
+        aria-label="{label}, last {points.length} samples. Use arrow keys to inspect values."
+        tabindex="0"
+        onpointermove={onMove}
+        onpointerleave={() => (hover = null)}
+        onfocus={() => (hover = points.length - 1)}
+        onblur={() => (hover = null)}
+        onkeydown={onKey}
+      >
+        <!-- biome-ignore-end lint/a11y/noNoninteractiveTabindex: see above -->
+        <defs>
+          {#each series as s, i (s.key)}
+            <linearGradient id="{uid}-{i}" x1="0" x2="0" y1="0" y2="1">
+              <stop
+                offset="0"
+                stop-color={s.color}
+                stop-opacity={series.length === 1 ? 0.32 : 0.16}
+              />
+              <stop offset="1" stop-color={s.color} stop-opacity="0" />
+            </linearGradient>
+          {/each}
+        </defs>
+        {#each [0.25, 0.5, 0.75] as f (f)}
+          <line
+            class="grid"
+            x1="0"
+            x2={width}
+            y1={Math.round(height * f) + 0.5}
+            y2={Math.round(height * f) + 0.5}
+          />
+        {/each}
         {#each series as s, i (s.key)}
-          <linearGradient id="{uid}-{i}" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stop-color={s.color} stop-opacity={series.length === 1 ? 0.32 : 0.16} />
-            <stop offset="1" stop-color={s.color} stop-opacity="0" />
-          </linearGradient>
+          <path d={area(s.key)} fill="url(#{uid}-{i})" />
         {/each}
-      </defs>
-      {#each [0.25, 0.5, 0.75] as f (f)}
-        <line class="grid" x1="0" x2={width} y1={Math.round(height * f) + 0.5} y2={Math.round(height * f) + 0.5} />
-      {/each}
-      {#each series as s, i (s.key)}
-        <path d={area(s.key)} fill="url(#{uid}-{i})" />
-      {/each}
-      {#each series as s (s.key)}
-        <path d={line(s.key)} fill="none" stroke={s.color} stroke-width="2" stroke-linejoin="round" />
-      {/each}
+        {#each series as s (s.key)}
+          <path
+            d={line(s.key)}
+            fill="none"
+            stroke={s.color}
+            stroke-width="2"
+            stroke-linejoin="round"
+          />
+        {/each}
+        {#if hp}
+          <line class="cross" x1={tipLeft} x2={tipLeft} y1="0" y2={height} />
+          {#each series as s (s.key)}
+            {@const v = hp[s.key] as number | null}
+            {#if v !== null}
+              <circle cx={tipLeft} cy={y(v)} r="4" fill={s.color} class="dot" />
+            {/if}
+          {/each}
+        {/if}
+      </svg>
       {#if hp}
-        <line class="cross" x1={tipLeft} x2={tipLeft} y1="0" y2={height} />
-        {#each series as s (s.key)}
-          {@const v = hp[s.key] as number | null}
-          {#if v !== null}
-            <circle cx={tipLeft} cy={y(v)} r="4" fill={s.color} class="dot" />
-          {/if}
-        {/each}
+        <div class="tip" class:flip={tipLeft > width / 2} style:left="{tipLeft}px">
+          <div class="tip-time">{clock(hp.t)}</div>
+          {#each series as s (s.key)}
+            {@const v = hp[s.key] as number | null}
+            <div class="tip-row">
+              <span class="swatch" style:background={s.color}></span>
+              <span>{s.label}</span>
+              <b>{v === null ? '–' : format(v)}</b>
+            </div>
+          {/each}
+        </div>
       {/if}
-    </svg>
-    {#if hp}
-      <div class="tip" class:flip={tipLeft > width / 2} style:left="{tipLeft}px">
-        <div class="tip-time">{clock(hp.t)}</div>
-        {#each series as s (s.key)}
-          {@const v = hp[s.key] as number | null}
-          <div class="tip-row">
-            <span class="swatch" style:background={s.color}></span>
-            <span>{s.label}</span>
-            <b>{v === null ? '–' : format(v)}</b>
-          </div>
-        {/each}
-      </div>
     {/if}
-  {/if}
-</div>
-<div class="caption">
-  <span>{caption}</span>
-  {#if note}<span>{note}</span>{/if}
-</div>
+  </div>
+  <div class="caption">
+    <span>{caption}</span>
+    {#if note}
+      <span>{note}</span>
+    {/if}
+  </div>
 </div>
 
 <style>

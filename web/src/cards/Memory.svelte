@@ -1,9 +1,9 @@
 <script lang="ts">
   import Card from '../lib/Card.svelte';
   import Chart from '../lib/Chart.svelte';
+  import { bytes, span } from '../lib/format';
   import Gauge from '../lib/Gauge.svelte';
   import Meter from '../lib/Meter.svelte';
-  import { bytes, span } from '../lib/format';
   import type { Meta, Point, Sample } from '../lib/types';
 
   let { meta, sample, history }: { meta: Meta; sample: Sample; history: Point[] } = $props();

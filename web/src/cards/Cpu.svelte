@@ -1,8 +1,8 @@
 <script lang="ts">
   import Card from '../lib/Card.svelte';
   import Chart from '../lib/Chart.svelte';
-  import Gauge from '../lib/Gauge.svelte';
   import { level, pct, peak, span } from '../lib/format';
+  import Gauge from '../lib/Gauge.svelte';
   import type { Meta, Point, Sample } from '../lib/types';
 
   let { meta, sample, history }: { meta: Meta; sample: Sample; history: Point[] } = $props();
@@ -36,7 +36,9 @@
     {#each cores as c, i (i)}
       <div class="core" title="Thread {i}: {pct(c)}">
         <div class="bar {level(c)}"><div class="fill" style:height="{c}%"></div></div>
-        {#if labelled}<span>{i}</span>{/if}
+        {#if labelled}
+          <span>{i}</span>
+        {/if}
       </div>
     {/each}
   </div>

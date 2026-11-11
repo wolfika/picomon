@@ -1,6 +1,6 @@
 <script lang="ts">
   import { tick } from 'svelte';
-  import { THEMES, serverTheme, setTheme, themeLabel } from './theme';
+  import { serverTheme, setTheme, THEMES, themeLabel } from './theme';
 
   let current = $state(document.documentElement.dataset.theme ?? serverTheme);
   let open = $state(false);
@@ -17,7 +17,11 @@
     await tick();
     const all = items();
     const target =
-      focus === 'first' ? all[0] : focus === 'last' ? all.at(-1) : all[THEMES.indexOf(current as never)];
+      focus === 'first'
+        ? all[0]
+        : focus === 'last'
+          ? all.at(-1)
+          : all[THEMES.indexOf(current as never)];
     (target ?? all[0])?.focus();
   }
 
@@ -79,7 +83,15 @@
   </button>
 
   {#if open}
-    <div id="theme-menu-list" class="menu" role="menu" aria-label="Theme" tabindex="-1" bind:this={menu} onkeydown={onMenuKey}>
+    <div
+      id="theme-menu-list"
+      class="menu"
+      role="menu"
+      aria-label="Theme"
+      tabindex="-1"
+      bind:this={menu}
+      onkeydown={onMenuKey}
+    >
       {#each THEMES as t (t)}
         <button
           type="button"
@@ -91,9 +103,18 @@
           <!-- The swatch carries its own data-theme, so it previews that preset's colours. -->
           <span class="swatch" data-theme={t} aria-hidden="true"><i></i></span>
           <span class="name">{themeLabel(t)}</span>
-          {#if t === serverTheme}<span class="hint">default</span>{/if}
+          {#if t === serverTheme}
+            <span class="hint">default</span>
+          {/if}
           <svg class="check" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-            <path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path
+              d="M5 12.5l4.5 4.5L19 7.5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
         </button>
       {/each}
@@ -120,7 +141,7 @@
     cursor: pointer;
   }
   .icon-button:hover,
-  .icon-button[aria-expanded='true'] {
+  .icon-button[aria-expanded="true"] {
     border-color: color-mix(in srgb, var(--text) 30%, transparent);
   }
   .icon-button:focus-visible,
@@ -138,7 +159,9 @@
     border-radius: 12px;
     border: 1px solid var(--border);
     background: var(--tooltip);
-    box-shadow: var(--shadow), 0 12px 32px rgb(0 0 0 / 0.25);
+    box-shadow:
+      var(--shadow),
+      0 12px 32px rgb(0 0 0 / 0.25);
     backdrop-filter: var(--blur);
     -webkit-backdrop-filter: var(--blur);
   }
@@ -188,7 +211,7 @@
     margin-left: auto;
     visibility: hidden;
   }
-  [aria-checked='true'] .check {
+  [aria-checked="true"] .check {
     visibility: visible;
   }
 </style>

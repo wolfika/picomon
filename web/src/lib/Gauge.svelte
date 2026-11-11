@@ -26,6 +26,7 @@
   const frac = $derived(Math.min(1, Math.max(0, value / max)));
 </script>
 
+<!-- biome-ignore lint/a11y/useSemanticElements: <meter> cannot be styled consistently across browsers; role="meter" exposes the same semantics -->
 <div
   class="gauge"
   style:width="{size}px"

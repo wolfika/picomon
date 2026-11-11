@@ -4,7 +4,7 @@
  * Metric and series colours were checked for lightness, colour-vision-deficiency
  * separation and contrast against each theme's card surface.
  */
-[data-theme='glass'] {
+[data-theme="glass"] {
   color-scheme: dark;
   --bg: #090b1a;
   --bg-image:
@@ -33,7 +33,7 @@
   --crit: #f2555a;
 }
 
-[data-theme='dark'] {
+[data-theme="dark"] {
   color-scheme: dark;
   --bg: #0e1014;
   --bg-image: none;
@@ -58,7 +58,7 @@
   --crit: #e5484d;
 }
 
-[data-theme='light'] {
+[data-theme="light"] {
   color-scheme: light;
   --bg: #f2f3f7;
   --bg-image: none;
@@ -83,7 +83,7 @@
   --crit: #d93036;
 }
 
-[data-theme='nord'] {
+[data-theme="nord"] {
   color-scheme: dark;
   --bg: #2e3440;
   --bg-image: none;
@@ -118,7 +118,7 @@
  */
 
 /* Catppuccin Latte */
-[data-theme='catppuccin-latte'] {
+[data-theme="catppuccin-latte"] {
   color-scheme: light;
   --bg: #dce0e8; /* Crust */
   --bg-image: none;
@@ -145,7 +145,7 @@
 }
 
 /* Catppuccin Frappé */
-[data-theme='catppuccin-frappe'] {
+[data-theme="catppuccin-frappe"] {
   color-scheme: dark;
   --bg: #232634; /* Crust */
   --bg-image: none;
@@ -172,7 +172,7 @@
 }
 
 /* Catppuccin Macchiato */
-[data-theme='catppuccin-macchiato'] {
+[data-theme="catppuccin-macchiato"] {
   color-scheme: dark;
   --bg: #181926; /* Crust */
   --bg-image: none;
@@ -199,7 +199,7 @@
 }
 
 /* Catppuccin Mocha */
-[data-theme='catppuccin-mocha'] {
+[data-theme="catppuccin-mocha"] {
   color-scheme: dark;
   --bg: #11111b; /* Crust */
   --bg-image: none;
@@ -236,7 +236,13 @@ html {
   background-image: var(--bg-image);
   background-attachment: fixed;
   color: var(--text);
-  font: 14px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font:
+    14px / 1.45 system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    sans-serif;
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
 }
@@ -301,7 +307,7 @@ body {
 
 /* Trailing separators, so a wrapped line never starts with one. */
 .dots > :not(:last-child)::after {
-  content: '·';
+  content: "·";
   margin: 0 0.5em;
   color: var(--faint);
 }
@@ -333,6 +339,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   * {
+    /* biome-ignore lint/complexity/noImportantStyles: must override component transitions for users who ask for reduced motion */
     transition: none !important;
   }
 }

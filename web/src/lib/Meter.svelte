@@ -14,6 +14,7 @@
   const lvl = $derived(level(value));
 </script>
 
+<!-- biome-ignore lint/a11y/useSemanticElements: <meter> cannot be styled consistently across browsers; role="meter" exposes the same semantics -->
 <div
   class="meter {lvl}"
   style:--base={color}

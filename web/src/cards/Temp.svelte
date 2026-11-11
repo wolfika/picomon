@@ -1,8 +1,8 @@
 <script lang="ts">
   import Card from '../lib/Card.svelte';
   import Chart from '../lib/Chart.svelte';
-  import Gauge from '../lib/Gauge.svelte';
   import { span } from '../lib/format';
+  import Gauge from '../lib/Gauge.svelte';
   import type { Meta, Point } from '../lib/types';
 
   let { meta, temp, history }: { meta: Meta; temp: number; history: Point[] } = $props();
@@ -21,7 +21,14 @@
 
 <Card title="Temperature" aside={statusText[status]}>
   <div class="gauge-row">
-    <Gauge value={temp} max={100} display={temp.toFixed(1)} unit="°C" {color} label="CPU temperature" />
+    <Gauge
+      value={temp}
+      max={100}
+      display={temp.toFixed(1)}
+      unit="°C"
+      {color}
+      label="CPU temperature"
+    />
     <Chart
       label="CPU temperature"
       points={history}

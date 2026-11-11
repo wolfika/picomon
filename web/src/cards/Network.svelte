@@ -1,8 +1,8 @@
 <script lang="ts">
   import Card from '../lib/Card.svelte';
   import Chart from '../lib/Chart.svelte';
-  import Rates from '../lib/Rates.svelte';
   import { bytes, peak, rate, span } from '../lib/format';
+  import Rates from '../lib/Rates.svelte';
   import type { Meta, Point, Sample } from '../lib/types';
 
   let {

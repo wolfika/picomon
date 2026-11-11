@@ -19,7 +19,14 @@
       <div class="brand">
         <svg viewBox="0 0 32 32" width="20" height="20" aria-hidden="true">
           <rect width="32" height="32" rx="8" fill="var(--accent)" />
-          <path d="M5 18h5l3-8 5 14 3-6h6" fill="none" style:stroke="var(--on-accent, #fff)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path
+            d="M5 18h5l3-8 5 14 3-6h6"
+            fill="none"
+            style:stroke="var(--on-accent, #fff)"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
         Picomon
       </div>
@@ -29,7 +36,9 @@
         <p class="host dots">
           <span>{h.os}</span>
           <span>Linux {h.kernel}</span>
-          {#if h.cpu_model}<span>{h.cpu_model}</span>{/if}
+          {#if h.cpu_model}
+            <span>{h.cpu_model}</span>
+          {/if}
           <span>{h.cpus} threads</span>
           <span>{h.arch}</span>
         </p>
@@ -52,18 +61,18 @@
   </header>
 
   {#if live.meta && live.sample}
-    {@const { meta, sample, history } = live}
+    {@const { meta, sample } = live}
     {@const hasTemp = sample.cpu.temp !== null}
     <main class="grid">
-      <Cpu {meta} {sample} {history} />
+      <Cpu {meta} {sample} history={live.history} />
       {#if sample.cpu.temp !== null}
-        <Temp {meta} temp={sample.cpu.temp} {history} />
+        <Temp {meta} temp={sample.cpu.temp} history={live.history} />
       {/if}
-      <Memory {meta} {sample} {history} />
+      <Memory {meta} {sample} history={live.history} />
       <!-- Without the temperature card the first row is CPU, memory and storage,
            so the network card takes the whole second row. -->
-      <Network {meta} {sample} {history} class={hasTemp ? 'wide' : 'wide full'} />
-      <Disks {meta} {sample} {history} />
+      <Network {meta} {sample} history={live.history} class={hasTemp ? 'wide' : 'wide full'} />
+      <Disks {meta} {sample} history={live.history} />
     </main>
   {:else}
     <p class="empty muted">Waiting for the first sample…</p>

@@ -1,9 +1,9 @@
 <script lang="ts">
   import Card from '../lib/Card.svelte';
   import Chart from '../lib/Chart.svelte';
+  import { bytes, pct, peak, rate, span } from '../lib/format';
   import Meter from '../lib/Meter.svelte';
   import Rates from '../lib/Rates.svelte';
-  import { bytes, pct, peak, rate, span } from '../lib/format';
   import type { Disk, Meta, Point, Sample } from '../lib/types';
 
   let { meta, sample, history }: { meta: Meta; sample: Sample; history: Point[] } = $props();
@@ -40,7 +40,9 @@
         <div class="split">
           <span class="path" title={d.device}>
             <b>{d.mount}</b>
-            {#if d.fs}<span class="fs">{d.fs}</span>{/if}
+            {#if d.fs}
+              <span class="fs">{d.fs}</span>
+            {/if}
           </span>
           <span class="pct">{pct(p)}</span>
         </div>
