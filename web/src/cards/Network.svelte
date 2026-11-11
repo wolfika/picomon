@@ -1,23 +1,33 @@
 <script lang="ts">
   import Card from '../lib/Card.svelte';
   import Chart from '../lib/Chart.svelte';
-  import { bytes, rate } from '../lib/format';
+  import Rates from '../lib/Rates.svelte';
+  import { bytes, peak, rate, span } from '../lib/format';
   import type { Meta, Point, Sample } from '../lib/types';
 
-  let { meta, sample, history }: { meta: Meta; sample: Sample; history: Point[] } = $props();
+  let {
+    meta,
+    sample,
+    history,
+    class: klass = '',
+  }: { meta: Meta; sample: Sample; history: Point[]; class?: string } = $props();
+
+  const ifaces = $derived(sample.net.ifaces);
+  const top = $derived(Math.max(peak(history, 'rx'), peak(history, 'tx')));
 </script>
 
-<Card title="Network">
-  <div class="pair">
-    <div class="stat">
-      <span class="legend"><i style:background="var(--series-1)"></i>Download</span>
-      <span class="value">{rate(sample.net.rx)}</span>
-    </div>
-    <div class="stat">
-      <span class="legend"><i style:background="var(--series-2)"></i>Upload</span>
-      <span class="value">{rate(sample.net.tx)}</span>
-    </div>
-  </div>
+<Card
+  title="Network"
+  aside="{ifaces.length} interface{ifaces.length === 1 ? '' : 's'}"
+  class={klass}
+>
+  <Rates
+    large
+    items={[
+      { arrow: '↓', label: 'download', value: sample.net.rx, color: 'var(--series-1)' },
+      { arrow: '↑', label: 'upload', value: sample.net.tx, color: 'var(--series-2)' },
+    ]}
+  />
   <Chart
     label="Network throughput"
     points={history}
@@ -27,23 +37,55 @@
       { key: 'tx', label: 'Upload', color: 'var(--series-2)' },
     ]}
     format={rate}
-    binary
+    height={96}
+    caption={span(meta)}
+    note="peak {rate(top)}"
   />
-  {#if sample.net.ifaces.length > 0}
-    <table class="list">
-      <thead>
-        <tr><th>Interface</th><th>Down</th><th>Up</th><th>Total ↓/↑</th></tr>
-      </thead>
-      <tbody>
-        {#each sample.net.ifaces as i (i.name)}
-          <tr>
-            <td>{i.name}</td>
-            <td>{rate(i.rx)}</td>
-            <td>{rate(i.tx)}</td>
-            <td class="muted">{bytes(i.rx_total)} / {bytes(i.tx_total)}</td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
+  {#if ifaces.length > 0}
+    <ul class="ifaces">
+      {#each ifaces as i (i.name)}
+        <li>
+          <div>
+            <div class="name">{i.name}</div>
+            <div class="sub">{bytes(i.rx_total)} received · {bytes(i.tx_total)} sent</div>
+          </div>
+          <div class="now">
+            <span><i style:color="var(--series-1)">↓</i> {rate(i.rx)}</span>
+            <span><i style:color="var(--series-2)">↑</i> {rate(i.tx)}</span>
+          </div>
+        </li>
+      {/each}
+    </ul>
   {/if}
 </Card>
+
+<style>
+  .ifaces {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    border-top: 1px solid var(--grid);
+  }
+  .name {
+    font-weight: 600;
+  }
+  .now {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px 18px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  i {
+    font-style: normal;
+    font-weight: 700;
+  }
+</style>

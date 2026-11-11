@@ -1,12 +1,22 @@
 <script lang="ts">
   import { level } from './format';
 
-  let { value, label }: { value: number; label: string } = $props();
+  let {
+    value,
+    label,
+    color = 'var(--accent)',
+  }: {
+    value: number;
+    label: string;
+    /** Fill colour while below the warning threshold. */
+    color?: string;
+  } = $props();
   const lvl = $derived(level(value));
 </script>
 
 <div
   class="meter {lvl}"
+  style:--base={color}
   role="meter"
   aria-label={label}
   aria-valuemin="0"
@@ -18,11 +28,11 @@
 
 <style>
   .meter {
-    --c: var(--accent);
-    height: 8px;
+    --c: var(--base);
+    height: 6px;
     border-radius: 999px;
     /* Track is a lighter step of the fill colour so state reads across the whole bar. */
-    background: color-mix(in srgb, var(--c) 18%, transparent);
+    background: color-mix(in srgb, var(--c) 16%, transparent);
     overflow: hidden;
   }
   .meter.warn {
@@ -33,8 +43,9 @@
   }
   .fill {
     height: 100%;
+    min-width: 6px;
     border-radius: 999px;
-    background: var(--c);
+    background: linear-gradient(90deg, var(--c), color-mix(in oklab, var(--c) 70%, white));
     transition: width 0.4s ease;
   }
 </style>

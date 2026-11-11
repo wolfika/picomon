@@ -16,9 +16,10 @@
     capacity,
     format,
     max,
-    height = 72,
-    binary = false,
+    height = 64,
     label,
+    caption,
+    note,
   }: {
     points: Point[];
     series: Series[];
@@ -28,10 +29,14 @@
     /** Fixed top of the scale. Defaults to the largest value shown. */
     max?: number;
     height?: number;
-    /** Round the auto scale in powers of 1024, for byte values. */
-    binary?: boolean;
     label: string;
+    /** Left caption under the plot, normally the time window. */
+    caption: string;
+    /** Right caption under the plot, e.g. the peak value. */
+    note?: string;
   } = $props();
+
+  const uid = $props.id();
 
   let width = $state(0);
   let hover = $state<number | null>(null);
@@ -41,19 +46,9 @@
     if (max !== undefined) return max;
     let m = 0;
     for (const p of points) for (const s of series) m = Math.max(m, (p[s.key] as number | null) ?? 0);
-    return niceCeil(m);
+    // Headroom so the peak does not touch the top edge.
+    return m > 0 ? m * 1.15 : 1;
   });
-
-  /** Rounds up to 1, 2 or 5 times a power of ten, within the display unit when `binary`. */
-  function niceCeil(v: number): number {
-    if (v <= 0) return 1;
-    const unit = binary ? 1024 ** Math.max(0, Math.floor(Math.log(v) / Math.log(1024))) : 1;
-    v /= unit;
-    const p = 10 ** Math.floor(Math.log10(v)) * unit;
-    v *= unit;
-    for (const m of [1, 2, 5, 10]) if (v <= m * p) return m * p;
-    return 10 * p;
-  }
 
   // 2px inset keeps the stroke inside the box at 0 and at the top.
   const PAD = 2;
@@ -103,6 +98,7 @@
   const tipLeft = $derived(hover === null ? 0 : x(hover));
 </script>
 
+<div class="wrap">
 <div class="chart" bind:clientWidth={width} style:height="{height}px">
   {#if width > 0}
     <!-- Focusable so keyboard users can step through values with the arrow keys. -->
@@ -119,11 +115,20 @@
       onblur={() => (hover = null)}
       onkeydown={onKey}
     >
-      <line class="grid top" x1="0" x2={width} y1={PAD} y2={PAD} />
-      <line class="grid" x1="0" x2={width} y1={height - 0.5} y2={height - 0.5} />
-      {#if series.length === 1}
-        <path d={area(series[0].key)} fill={series[0].color} fill-opacity="0.16" />
-      {/if}
+      <defs>
+        {#each series as s, i (s.key)}
+          <linearGradient id="{uid}-{i}" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color={s.color} stop-opacity={series.length === 1 ? 0.32 : 0.16} />
+            <stop offset="1" stop-color={s.color} stop-opacity="0" />
+          </linearGradient>
+        {/each}
+      </defs>
+      {#each [0.25, 0.5, 0.75] as f (f)}
+        <line class="grid" x1="0" x2={width} y1={Math.round(height * f) + 0.5} y2={Math.round(height * f) + 0.5} />
+      {/each}
+      {#each series as s, i (s.key)}
+        <path d={area(s.key)} fill="url(#{uid}-{i})" />
+      {/each}
       {#each series as s (s.key)}
         <path d={line(s.key)} fill="none" stroke={s.color} stroke-width="2" stroke-linejoin="round" />
       {/each}
@@ -137,7 +142,6 @@
         {/each}
       {/if}
     </svg>
-    <span class="scale">{format(top)}</span>
     {#if hp}
       <div class="tip" class:flip={tipLeft > width / 2} style:left="{tipLeft}px">
         <div class="tip-time">{clock(hp.t)}</div>
@@ -153,13 +157,31 @@
     {/if}
   {/if}
 </div>
+<div class="caption">
+  <span>{caption}</span>
+  {#if note}<span>{note}</span>{/if}
+</div>
+</div>
 
 <style>
+  .wrap {
+    min-width: 0;
+  }
   .chart {
     position: relative;
     width: 100%;
-    /* Room for the scale label above the plot. */
-    margin-top: 16px;
+  }
+  .caption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0 12px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--faint);
+  }
+  .caption > :last-child {
+    margin-left: auto;
   }
   svg {
     display: block;
@@ -177,9 +199,6 @@
     stroke: var(--grid);
     stroke-width: 1;
   }
-  .grid.top {
-    stroke-dasharray: 2 4;
-  }
   .cross {
     stroke: var(--muted);
     stroke-width: 1;
@@ -187,15 +206,6 @@
   .dot {
     stroke: var(--surface);
     stroke-width: 2;
-  }
-  .scale {
-    position: absolute;
-    bottom: calc(100% + 1px);
-    right: 0;
-    line-height: 1;
-    font-size: 11px;
-    color: var(--muted);
-    pointer-events: none;
   }
   .tip {
     position: absolute;
