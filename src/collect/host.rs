@@ -22,7 +22,7 @@ impl HostInfo {
             kernel: read("/proc/sys/kernel/osrelease").trim().to_string(),
             arch: std::env::consts::ARCH,
             cpu_model: cpu_model(&read("/proc/cpuinfo")),
-            cpus: std::thread::available_parallelism().map_or(1, |n| n.get()),
+            cpus: cpu_count(&read("/proc/stat")),
         }
     }
 }
@@ -50,6 +50,16 @@ fn cpu_model(cpuinfo: &str) -> String {
     String::new()
 }
 
+/// Online CPUs as listed in /proc/stat, matching the per-core usage figures.
+/// `available_parallelism` is not used because it shrinks under cgroup quotas
+/// and affinity masks, while /proc/stat always lists every online CPU.
+fn cpu_count(stat: &str) -> usize {
+    stat.lines()
+        .filter(|l| l.strip_prefix("cpu").is_some_and(|r| r.starts_with(|c: char| c.is_ascii_digit())))
+        .count()
+        .max(1)
+}
+
 pub fn uptime() -> f64 {
     read("/proc/uptime").split_whitespace().next().and_then(|v| v.parse().ok()).unwrap_or(0.0)
 }
@@ -74,5 +84,11 @@ mod tests {
     fn parses_cpu_model() {
         assert_eq!(cpu_model("processor\t: 0\nmodel name\t: AMD Ryzen 7\n"), "AMD Ryzen 7");
         assert_eq!(cpu_model("Hardware\t: BCM2835\n"), "BCM2835");
+    }
+
+    #[test]
+    fn counts_cpus_from_stat() {
+        assert_eq!(cpu_count("cpu  1 2 3\ncpu0 1 2 3\ncpu1 1 2 3\nintr 5\n"), 2);
+        assert_eq!(cpu_count(""), 1);
     }
 }
