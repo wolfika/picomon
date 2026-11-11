@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2024"
 description = "Tiny self-hosted Linux server monitor with a web dashboard"
 license = "MIT"
+repository = "https://github.com/wolfika/picomon"
+readme = "README.md"
+# Distributed as release binaries, not on crates.io.
+publish = false
 
 [dependencies]
 axum = { version = "0.8.9", default-features = false, features = ["http1", "tokio"] }
