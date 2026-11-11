@@ -27,7 +27,10 @@ test: web/node_modules
 install:
 	@[ -f target/release/picomon ] || { echo "target/release/picomon not found. Run 'make build' first." >&2; exit 1; }
 	install -Dm755 target/release/picomon $(DESTDIR)$(PREFIX)/bin/picomon
-	install -Dm644 contrib/picomon.service $(DESTDIR)/etc/systemd/system/picomon.service
+	# The unit names /usr/local/bin; rewrite it for the PREFIX in use.
+	install -d $(DESTDIR)/etc/systemd/system
+	sed 's|/usr/local/bin/picomon|$(PREFIX)/bin/picomon|' contrib/picomon.service > $(DESTDIR)/etc/systemd/system/picomon.service
+	chmod 644 $(DESTDIR)/etc/systemd/system/picomon.service
 	[ -e $(DESTDIR)/etc/picomon/config.toml ] || \
 		install -Dm600 config.example.toml $(DESTDIR)/etc/picomon/config.toml
 
