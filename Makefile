@@ -1,7 +1,7 @@
 PREFIX ?= /usr/local
 DESTDIR ?=
 
-.PHONY: all web build dev test install uninstall clean
+.PHONY: all web build dev test lint fmt install uninstall clean
 
 all: build
 
@@ -23,6 +23,17 @@ dev: web/node_modules
 test: web/node_modules
 	cargo test
 	cd web && bun run check
+
+# Formatting and lint checks, as run in CI.
+lint: web/node_modules
+	cargo fmt --check
+	cargo clippy --all-targets -- -D warnings
+	cd web && bun run lint
+
+# Applies formatting and safe lint fixes.
+fmt: web/node_modules
+	cargo fmt
+	cd web && bun run fix
 
 install:
 	@[ -f target/release/picomon ] || { echo "target/release/picomon not found. Run 'make build' first." >&2; exit 1; }
