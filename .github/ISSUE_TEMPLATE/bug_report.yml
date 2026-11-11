@@ -1,0 +1,54 @@
+name: Bug report
+description: Something does not work as documented.
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Picomon version
+      description: Output of `picomon --version`.
+      placeholder: picomon 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installed from
+      options:
+        - Release binary
+        - Built from source
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: System
+      description: Architecture and distribution.
+      placeholder: aarch64, Raspberry Pi OS 12
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration
+      description: The relevant part of your config. Remove `auth.password`.
+      render: toml
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: For example `journalctl -u picomon -n 50`.
+      render: text
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      description: Only for dashboard problems.
+      placeholder: Firefox 140
