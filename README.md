@@ -51,15 +51,17 @@ The sensor is detected from hwmon (`coretemp`, `k10temp`, `zenpower`, `cpu_therm
 
 `theme.preset` selects a built-in theme. `glass` is the default. `[theme.colors]` overrides any theme variable; keys are CSS variable names without the leading `--`:
 
-| Variable                                        | Used for                                        |
-| ----------------------------------------------- | ----------------------------------------------- |
-| `bg`, `bg-image`                                | Page background                                 |
-| `surface`, `border`, `shadow`, `blur`, `radius` | Cards                                           |
-| `text`, `muted`                                 | Text                                            |
-| `grid`, `tooltip`                               | Chart axes and tooltip                          |
-| `accent`                                        | Single-series charts and meters                 |
-| `series-1`, `series-2`                          | Two-series charts (download/upload, read/write) |
-| `ok`, `warn`, `crit`                            | Status colours                                  |
+| Variable                                        | Used for                                                          |
+| ----------------------------------------------- | ----------------------------------------------------------------- |
+| `bg`, `bg-image`                                | Page background                                                   |
+| `surface`, `border`, `shadow`, `blur`, `radius` | Cards                                                             |
+| `hero`                                          | Header card background, layered over `surface`                    |
+| `text`, `muted`, `faint`                        | Text, from strongest to weakest                                   |
+| `grid`, `tooltip`                               | Chart gridlines, tooltip and menu background                      |
+| `accent`                                        | Brand mark and focus rings                                        |
+| `cpu`, `mem`                                    | CPU and memory gauges and charts                                  |
+| `series-1`, `series-2`                          | Download/upload and read/write; `series-1` also fills disk meters |
+| `ok`, `warn`, `crit`                            | Status colours, including the temperature gauge                   |
 
 Viewers can switch theme from the menu button in the page header. The choice is stored in their browser.
 
