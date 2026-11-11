@@ -1,3 +1,4 @@
+mod collect;
 mod config;
 
 use std::path::PathBuf;
