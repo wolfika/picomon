@@ -2,6 +2,7 @@ mod collect;
 mod config;
 mod hub;
 mod server;
+mod service;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -17,6 +18,7 @@ Usage: picomon [OPTIONS]
 Options:
   -c, --config <PATH>  Config file (default: $PICOMON_CONFIG, then /etc/picomon/config.toml if present)
       --print-config   Print the default config and exit
+      --print-service  Print a systemd unit that runs this binary and exit
   -h, --help           Print help
   -V, --version        Print version
 ";
@@ -41,6 +43,19 @@ fn parse_args() -> Cli {
             "--print-config" => {
                 print!("{}", config::EXAMPLE);
                 return Cli::Exit(ExitCode::SUCCESS);
+            }
+            "--print-service" => {
+                let exe = std::env::current_exe().ok();
+                return match exe.as_deref().and_then(|p| p.to_str()) {
+                    Some(exe) => {
+                        print!("{}", service::unit(exe));
+                        Cli::Exit(ExitCode::SUCCESS)
+                    }
+                    None => {
+                        eprintln!("error: cannot determine this binary's path as UTF-8");
+                        Cli::Exit(ExitCode::FAILURE)
+                    }
+                };
             }
             "-h" | "--help" => {
                 print!("{USAGE}");
