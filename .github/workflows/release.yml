@@ -1,7 +1,8 @@
-# Releases are driven by release-please. On every push to main it opens or
-# updates a release PR from the conventional commits since the last release.
-# Merging that PR tags the release, and the jobs below then attach static
-# binaries and checksums to it.
+# Releases are driven by release-please. On every push to main the CI checks
+# run first; if they pass, release-please opens or updates a release PR from
+# the conventional commits since the last release. Merging that PR tags the
+# release, and the jobs below then attach smoke-tested static binaries and
+# checksums to it.
 #
 # Everything runs in this one workflow because a tag or release created with
 # GITHUB_TOKEN does not trigger other workflows.
@@ -17,7 +18,11 @@ permissions:
   pull-requests: write
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   release-please:
+    needs: ci
     runs-on: ubuntu-latest
     outputs:
       created: ${{ steps.release.outputs.release_created }}
@@ -58,6 +63,12 @@ jobs:
       # musl targets give fully static binaries that run on any distribution.
       - run: cross build --release --target ${{ matrix.target }}
       - run: cp target/${{ matrix.target }}/release/picomon ${{ matrix.asset }}
+
+      # Registers QEMU with binfmt_misc, so the static ARM binaries run directly.
+      - uses: docker/setup-qemu-action@v3
+      - run: .github/scripts/smoke-test.sh ${{ matrix.asset }} "${TAG#v}"
+        env:
+          TAG: ${{ needs.release-please.outputs.tag }}
 
       - uses: actions/upload-artifact@v4
         with:
