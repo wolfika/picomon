@@ -99,13 +99,13 @@ fn escape_html(s: &str) -> String {
 
 async fn stream(State(app): State<App>) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     // Subscribe before taking the snapshot so no sample falls in between.
-    // A sample may then appear twice; the client drops samples it already has.
+    // Samples published in that gap arrive again over the channel; the client
+    // drops any whose `seq` is not above the init sample's.
     let rx = app.hub.subscribe();
-    let latest = app.hub.latest();
+    let (history, latest) = app.hub.snapshot();
     let init = format!(
-        r#"{{"meta":{},"history":{},"sample":{}}}"#,
+        r#"{{"meta":{},"history":{history},"sample":{}}}"#,
         app.meta,
-        app.hub.history_json(),
         latest.as_deref().unwrap_or("null"),
     );
     let first = tokio_stream::once(Ok(Event::default().event("init").data(init)));

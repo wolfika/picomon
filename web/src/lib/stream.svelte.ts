@@ -36,8 +36,9 @@ class Live {
 
     es.addEventListener('sample', (e) => {
       const s: Sample = JSON.parse(e.data);
-      // The server may send the sample that was already in init.
-      if (this.sample && s.t <= this.sample.t) return;
+      // The server may resend samples already covered by init. Compare sequence
+      // numbers, not timestamps, which go backwards when the server clock is stepped.
+      if (this.sample && s.seq <= this.sample.seq) return;
       this.sample = s;
       const cap = this.meta?.history_len ?? 0;
       if (cap > 0) {

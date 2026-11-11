@@ -9,20 +9,25 @@ use tokio::sync::broadcast;
 use crate::collect::{Collector, Point, Sample};
 
 pub struct Hub {
-    history: Mutex<VecDeque<Point>>,
+    state: Mutex<State>,
     capacity: usize,
-    /// Latest sample, serialized once and shared by every client.
-    latest: Mutex<Option<Arc<str>>>,
     tx: broadcast::Sender<Arc<str>>,
+}
+
+/// History and latest sample share one lock, so a snapshot always has a
+/// history that ends with the latest sample.
+struct State {
+    history: VecDeque<Point>,
+    /// Latest sample, serialized once and shared by every client.
+    latest: Option<Arc<str>>,
 }
 
 impl Hub {
     pub fn new(capacity: usize) -> Self {
         let (tx, _) = broadcast::channel(16);
         Self {
-            history: Mutex::new(VecDeque::with_capacity(capacity)),
+            state: Mutex::new(State { history: VecDeque::with_capacity(capacity), latest: None }),
             capacity,
-            latest: Mutex::new(None),
             tx,
         }
     }
@@ -35,14 +40,16 @@ impl Hub {
                 return;
             }
         };
-        if self.capacity > 0 {
-            let mut h = self.history.lock().unwrap();
-            if h.len() == self.capacity {
-                h.pop_front();
+        {
+            let mut st = self.state.lock().unwrap();
+            if self.capacity > 0 {
+                if st.history.len() == self.capacity {
+                    st.history.pop_front();
+                }
+                st.history.push_back(sample.point());
             }
-            h.push_back(sample.point());
+            st.latest = Some(json.clone());
         }
-        *self.latest.lock().unwrap() = Some(json.clone());
         // An error only means there are no subscribers.
         let _ = self.tx.send(json);
     }
@@ -52,17 +59,16 @@ impl Hub {
     }
 
     pub fn latest(&self) -> Option<Arc<str>> {
-        self.latest.lock().unwrap().clone()
+        self.state.lock().unwrap().latest.clone()
     }
 
-    pub fn history_json(&self) -> String {
-        let h = self.history.lock().unwrap();
-        let (a, b) = h.as_slices();
-        let mut v = Vec::with_capacity(h.len());
-        v.extend_from_slice(a);
-        v.extend_from_slice(b);
-        drop(h);
-        serde_json::to_string(&v).unwrap_or_else(|_| "[]".into())
+    /// The history as a JSON array and the latest sample, taken together.
+    pub fn snapshot(&self) -> (String, Option<Arc<str>>) {
+        let st = self.state.lock().unwrap();
+        let points: Vec<Point> = st.history.iter().copied().collect();
+        let latest = st.latest.clone();
+        drop(st);
+        (serde_json::to_string(&points).unwrap_or_else(|_| "[]".into()), latest)
     }
 }
 

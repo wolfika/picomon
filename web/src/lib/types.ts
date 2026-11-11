@@ -35,6 +35,8 @@ export interface Iface {
 }
 
 export interface Sample {
+  /** Increases by one per sample; used for de-duplication instead of `t`. */
+  seq: number;
   t: number;
   uptime: number;
   load: [number, number, number];

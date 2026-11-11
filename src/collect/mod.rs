@@ -18,6 +18,9 @@ use crate::config::Config;
 
 #[derive(Serialize)]
 pub struct Sample {
+    /// Increases by one per sample. Clients use it to drop samples they already
+    /// have; `t` is wall-clock time and can jump backwards.
+    pub seq: u64,
     /// Unix time in milliseconds.
     pub t: u64,
     pub uptime: f64,
@@ -92,6 +95,7 @@ pub struct Collector {
     temp_path: Option<PathBuf>,
     mounts: Vec<String>,
     last: Instant,
+    seq: u64,
 }
 
 impl Collector {
@@ -104,6 +108,7 @@ impl Collector {
             temp_path,
             mounts: cfg.disks.mounts.clone(),
             last: Instant::now(),
+            seq: 0,
         }
     }
 
@@ -116,9 +121,11 @@ impl Collector {
         let secs = now.duration_since(self.last).as_secs_f64();
         self.last = now;
 
+        self.seq += 1;
         let (usage, cores) = self.cpu.sample();
         let (rx, tx, ifaces) = self.net.sample(secs);
         Sample {
+            seq: self.seq,
             t: SystemTime::now().duration_since(UNIX_EPOCH).map_or(0, |d| d.as_millis() as u64),
             uptime: host::uptime(),
             load: host::loadavg(),
