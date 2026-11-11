@@ -1,0 +1,358 @@
+/*
+ * Themes. Each preset sets the same variables; config `[theme.colors]` overrides
+ * any of them via a `:root:root` rule injected by the server, which outranks these.
+ * Series colours were checked for colour-vision-deficiency separation and contrast
+ * against each theme's card surface.
+ */
+[data-theme='glass'] {
+  color-scheme: dark;
+  --bg: #0b0e1f;
+  --bg-image:
+    radial-gradient(at 12% 8%, rgb(99 102 241 / 0.45), transparent 45%),
+    radial-gradient(at 88% 18%, rgb(236 72 153 / 0.28), transparent 42%),
+    radial-gradient(at 50% 100%, rgb(14 165 233 / 0.3), transparent 55%);
+  --surface: rgb(255 255 255 / 0.06);
+  --border: rgb(255 255 255 / 0.12);
+  --shadow: 0 8px 32px rgb(0 0 0 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.08);
+  --blur: blur(18px) saturate(160%);
+  --radius: 20px;
+  --text: #eef0ff;
+  --muted: #a6abcc;
+  --grid: rgb(255 255 255 / 0.12);
+  --tooltip: rgb(20 23 45 / 0.92);
+  --accent: #7b8cff;
+  --series-1: #4f8ff7;
+  --series-2: #dc6430;
+  --ok: #3ccf91;
+  --warn: #f5a524;
+  --crit: #f2555a;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0f1115;
+  --bg-image: none;
+  --surface: #171a21;
+  --border: #262a33;
+  --shadow: none;
+  --blur: none;
+  --radius: 12px;
+  --text: #e6e8ee;
+  --muted: #959cab;
+  --grid: #2a2f3a;
+  --tooltip: #1f232c;
+  --accent: #3987e5;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --ok: #2fb67c;
+  --warn: #e5a50a;
+  --crit: #e5484d;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f3f4f7;
+  --bg-image: none;
+  --surface: #ffffff;
+  --border: #e3e5ea;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.06);
+  --blur: none;
+  --radius: 12px;
+  --text: #15171c;
+  --muted: #5d6472;
+  --grid: #e6e8ec;
+  --tooltip: #ffffff;
+  --accent: #2a78d6;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --ok: #1f9d63;
+  --warn: #d98e04;
+  --crit: #d93036;
+}
+
+[data-theme='nord'] {
+  color-scheme: dark;
+  --bg: #2e3440;
+  --bg-image: none;
+  --surface: #3b4252;
+  --border: #434c5e;
+  --shadow: none;
+  --blur: none;
+  --radius: 10px;
+  --text: #eceff4;
+  --muted: #b5bdcc;
+  --grid: #4c566a;
+  --tooltip: #2e3440;
+  --accent: #88c0d0;
+  --series-1: #5e9ad0;
+  --series-2: #d0703f;
+  --ok: #a3be8c;
+  --warn: #ebcb8b;
+  --crit: #bf616a;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--bg);
+  background-image: var(--bg-image);
+  background-attachment: fixed;
+  color: var(--text);
+  font: 14px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px 16px 20px;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-bottom: 20px;
+}
+
+.top h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.top p {
+  margin: 2px 0 0;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.conn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  font-size: 12px;
+}
+
+.conn i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--warn);
+}
+
+.conn.on i {
+  background: var(--ok);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 25%, transparent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.empty {
+  padding: 64px 0;
+  text-align: center;
+}
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  font-size: 12px;
+}
+
+footer select {
+  margin-left: 6px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+footer option {
+  background: var(--bg);
+}
+
+/* Shared card content. */
+
+.muted {
+  color: var(--muted);
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hero {
+  font-size: 40px;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.unit {
+  margin-left: 2px;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.kv {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  font-size: 12px;
+  text-align: right;
+}
+
+.kv div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.kv dt {
+  color: var(--muted);
+}
+
+.kv dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat .value {
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.legend i {
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.meter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meter-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  min-width: 0;
+}
+
+.meter-head .muted {
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
+.badge.warn::before {
+  background: var(--warn);
+}
+
+.badge.crit::before {
+  background: var(--crit);
+}
+
+.list {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.list th {
+  font-weight: 500;
+  color: var(--muted);
+  text-align: left;
+  padding: 0 0 6px;
+}
+
+.list td {
+  padding: 6px 0;
+  border-top: 1px solid var(--grid);
+}
+
+.list th:not(:first-child),
+.list td:not(:first-child) {
+  text-align: right;
+  padding-left: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
