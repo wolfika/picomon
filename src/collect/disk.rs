@@ -8,8 +8,8 @@ use super::Rate;
 
 /// Filesystems shown when no mounts are configured.
 const PHYSICAL_FS: &[&str] = &[
-    "ext2", "ext3", "ext4", "xfs", "btrfs", "zfs", "f2fs", "bcachefs", "jfs", "reiserfs",
-    "nilfs2", "vfat", "exfat", "ntfs", "ntfs3", "fuseblk",
+    "ext2", "ext3", "ext4", "xfs", "btrfs", "zfs", "f2fs", "bcachefs", "jfs", "reiserfs", "nilfs2",
+    "vfat", "exfat", "ntfs", "ntfs3", "fuseblk",
 ];
 
 #[derive(Serialize)]
@@ -36,7 +36,10 @@ fn unescape(s: &str) -> String {
     let mut out = Vec::with_capacity(b.len());
     let mut i = 0;
     while i < b.len() {
-        if b[i] == b'\\' && i + 3 < b.len() && b[i + 1..i + 4].iter().all(|c| (b'0'..=b'7').contains(c)) {
+        if b[i] == b'\\'
+            && i + 3 < b.len()
+            && b[i + 1..i + 4].iter().all(|c| (b'0'..=b'7').contains(c))
+        {
             let v = (b[i + 1] - b'0') * 64 + (b[i + 2] - b'0') * 8 + (b[i + 3] - b'0');
             out.push(v);
             i += 4;
@@ -66,7 +69,11 @@ fn mounts() -> Vec<Mount> {
 /// for a path is visible, and statvfs on that path reports that entry.
 fn visible(all: Vec<Mount>) -> Vec<Mount> {
     let mut seen = HashSet::new();
-    let mut out: Vec<Mount> = all.into_iter().rev().filter(|m| seen.insert(m.mount.clone())).collect();
+    let mut out: Vec<Mount> = all
+        .into_iter()
+        .rev()
+        .filter(|m| seen.insert(m.mount.clone()))
+        .collect();
     out.reverse();
     out
 }
@@ -74,7 +81,10 @@ fn visible(all: Vec<Mount>) -> Vec<Mount> {
 /// Picks visible physical filesystems, keeping one mount point per device (the shortest).
 fn auto_select(all: Vec<Mount>) -> Vec<Mount> {
     let mut picked: Vec<Mount> = Vec::new();
-    for m in visible(all).into_iter().filter(|m| PHYSICAL_FS.contains(&m.fs.as_str())) {
+    for m in visible(all)
+        .into_iter()
+        .filter(|m| PHYSICAL_FS.contains(&m.fs.as_str()))
+    {
         match picked.iter_mut().find(|p| p.device == m.device) {
             Some(p) if m.mount.len() < p.mount.len() => *p = m,
             Some(_) => {}
@@ -112,8 +122,16 @@ pub fn usage(configured: &[String]) -> Vec<Disk> {
             .map(|path| {
                 // The last matching entry is the one currently visible at that path.
                 all.iter().rev().find(|m| &m.mount == path).map_or_else(
-                    || Mount { device: String::new(), mount: path.clone(), fs: String::new() },
-                    |m| Mount { device: m.device.clone(), mount: m.mount.clone(), fs: m.fs.clone() },
+                    || Mount {
+                        device: String::new(),
+                        mount: path.clone(),
+                        fs: String::new(),
+                    },
+                    |m| Mount {
+                        device: m.device.clone(),
+                        mount: m.mount.clone(),
+                        fs: m.fs.clone(),
+                    },
                 )
             })
             .collect()
@@ -122,7 +140,14 @@ pub fn usage(configured: &[String]) -> Vec<Disk> {
         .into_iter()
         .filter_map(|m| {
             let (total, used, avail) = statvfs(&m.mount)?;
-            (total > 0).then_some(Disk { mount: m.mount, device: m.device, fs: m.fs, total, used, avail })
+            (total > 0).then_some(Disk {
+                mount: m.mount,
+                device: m.device,
+                fs: m.fs,
+                total,
+                used,
+                avail,
+            })
         })
         .collect()
 }
@@ -157,10 +182,11 @@ fn io_counters() -> IoCounters {
 /// Sums per-device byte deltas. A device without a previous reading (just
 /// plugged in) contributes nothing, rather than its whole lifetime total.
 fn io_delta(prev: &IoCounters, now: &IoCounters) -> (u64, u64) {
-    now.iter().fold((0, 0), |(r, w), (name, &(nr, nw))| match prev.get(name) {
-        Some(&(pr, pw)) => (r + nr.saturating_sub(pr), w + nw.saturating_sub(pw)),
-        None => (r, w),
-    })
+    now.iter()
+        .fold((0, 0), |(r, w), (name, &(nr, nw))| match prev.get(name) {
+            Some(&(pr, pw)) => (r + nr.saturating_sub(pr), w + nw.saturating_sub(pw)),
+            None => (r, w),
+        })
 }
 
 pub struct IoState {
@@ -169,14 +195,19 @@ pub struct IoState {
 
 impl IoState {
     pub fn new() -> Self {
-        Self { prev: io_counters() }
+        Self {
+            prev: io_counters(),
+        }
     }
 
     pub fn sample(&mut self, secs: f64) -> Rate {
         let now = io_counters();
         let (read, write) = io_delta(&self.prev, &now);
         self.prev = now;
-        Rate { read: super::rate(read, 0, secs), write: super::rate(write, 0, secs) }
+        Rate {
+            read: super::rate(read, 0, secs),
+            write: super::rate(write, 0, secs),
+        }
     }
 }
 
@@ -185,7 +216,11 @@ mod tests {
     use super::*;
 
     fn m(device: &str, mount: &str, fs: &str) -> Mount {
-        Mount { device: device.into(), mount: mount.into(), fs: fs.into() }
+        Mount {
+            device: device.into(),
+            mount: mount.into(),
+            fs: fs.into(),
+        }
     }
 
     #[test]
@@ -232,14 +267,20 @@ mod tests {
             m("/dev/sdb1", "/mnt", "ext4"),
             m("/dev/sdc1", "/mnt", "xfs"),
         ]);
-        let pairs: Vec<(&str, &str)> = got.iter().map(|m| (m.device.as_str(), m.mount.as_str())).collect();
+        let pairs: Vec<(&str, &str)> = got
+            .iter()
+            .map(|m| (m.device.as_str(), m.mount.as_str()))
+            .collect();
         assert_eq!(pairs, [("/dev/sda1", "/"), ("/dev/sdc1", "/mnt")]);
     }
 
     #[test]
     fn hidden_by_non_physical_mount() {
         // A tmpfs over /data hides the disk; statvfs("/data") would report the tmpfs.
-        let got = auto_select(vec![m("/dev/sdb1", "/data", "ext4"), m("tmpfs", "/data", "tmpfs")]);
+        let got = auto_select(vec![
+            m("/dev/sdb1", "/data", "ext4"),
+            m("tmpfs", "/data", "tmpfs"),
+        ]);
         assert!(got.is_empty());
     }
 }

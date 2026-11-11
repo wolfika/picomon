@@ -29,7 +29,10 @@ pub struct Server {
 
 impl Default for Server {
     fn default() -> Self {
-        Self { listen: "0.0.0.0:7340".into(), title: None }
+        Self {
+            listen: "0.0.0.0:7340".into(),
+            title: None,
+        }
     }
 }
 
@@ -51,7 +54,10 @@ pub struct Collector {
 
 impl Default for Collector {
     fn default() -> Self {
-        Self { interval: 2.0, history: 10.0 }
+        Self {
+            interval: 2.0,
+            history: 10.0,
+        }
     }
 }
 
@@ -92,9 +98,11 @@ impl Default for Network {
     fn default() -> Self {
         Self {
             include: Vec::new(),
-            exclude: ["lo", "veth*", "docker*", "br-*", "virbr*", "cni*", "flannel*"]
-                .map(String::from)
-                .to_vec(),
+            exclude: [
+                "lo", "veth*", "docker*", "br-*", "virbr*", "cni*", "flannel*",
+            ]
+            .map(String::from)
+            .to_vec(),
         }
     }
 }
@@ -109,7 +117,10 @@ pub struct Theme {
 
 impl Default for Theme {
     fn default() -> Self {
-        Self { preset: "glass".into(), colors: BTreeMap::new() }
+        Self {
+            preset: "glass".into(),
+            colors: BTreeMap::new(),
+        }
     }
 }
 
@@ -167,11 +178,20 @@ impl Config {
             ));
         }
         for (key, value) in &self.theme.colors {
-            if key.is_empty() || !key.chars().all(|ch| ch.is_ascii_alphanumeric() || ch == '-') {
+            if key.is_empty()
+                || !key
+                    .chars()
+                    .all(|ch| ch.is_ascii_alphanumeric() || ch == '-')
+            {
                 return Err(format!("theme.colors: invalid variable name {key:?}"));
             }
-            if value.chars().any(|ch| matches!(ch, ';' | '{' | '}' | '<' | '>' | '\\')) {
-                return Err(format!("theme.colors.{key}: value contains a forbidden character"));
+            if value
+                .chars()
+                .any(|ch| matches!(ch, ';' | '{' | '}' | '<' | '>' | '\\'))
+            {
+                return Err(format!(
+                    "theme.colors.{key}: value contains a forbidden character"
+                ));
             }
         }
         Ok(())
@@ -208,7 +228,10 @@ mod tests {
 
     #[test]
     fn history_len() {
-        let c = Collector { interval: 2.0, history: 10.0 };
+        let c = Collector {
+            interval: 2.0,
+            history: 10.0,
+        };
         assert_eq!(c.history_len(), 300);
     }
 

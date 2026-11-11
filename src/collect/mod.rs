@@ -126,7 +126,9 @@ impl Collector {
         let (rx, tx, ifaces) = self.net.sample(secs);
         Sample {
             seq: self.seq,
-            t: SystemTime::now().duration_since(UNIX_EPOCH).map_or(0, |d| d.as_millis() as u64),
+            t: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .map_or(0, |d| d.as_millis() as u64),
             uptime: host::uptime(),
             load: host::loadavg(),
             cpu: CpuSample {
@@ -149,7 +151,11 @@ fn read(path: impl AsRef<std::path::Path>) -> String {
 
 /// Computes a whole per-second rate, treating counter resets as zero.
 fn rate(now: u64, prev: u64, secs: f64) -> f64 {
-    if secs <= 0.0 { 0.0 } else { (now.saturating_sub(prev) as f64 / secs).round() }
+    if secs <= 0.0 {
+        0.0
+    } else {
+        (now.saturating_sub(prev) as f64 / secs).round()
+    }
 }
 
 #[cfg(test)]

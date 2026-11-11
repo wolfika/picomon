@@ -4,15 +4,28 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 /// hwmon chip names that report CPU temperature, in order of preference.
-const HWMON_CHIPS: &[&str] =
-    &["coretemp", "k10temp", "zenpower", "cpu_thermal", "cpu-thermal", "soc_thermal", "acpitz"];
+const HWMON_CHIPS: &[&str] = &[
+    "coretemp",
+    "k10temp",
+    "zenpower",
+    "cpu_thermal",
+    "cpu-thermal",
+    "soc_thermal",
+    "acpitz",
+];
 
 /// Preferred sensor labels within a chip. Tdie is the real die temperature on AMD;
 /// Tctl may carry an offset.
 const LABELS: &[&str] = &["Package id 0", "Tdie", "Tctl"];
 
 /// thermal_zone types that report CPU temperature, in order of preference.
-const ZONE_TYPES: &[&str] = &["x86_pkg_temp", "cpu-thermal", "cpu_thermal", "soc-thermal", "acpitz"];
+const ZONE_TYPES: &[&str] = &[
+    "x86_pkg_temp",
+    "cpu-thermal",
+    "cpu_thermal",
+    "soc-thermal",
+    "acpitz",
+];
 
 fn read_trim(p: &Path) -> Option<String> {
     fs::read_to_string(p).ok().map(|s| s.trim().to_string())
@@ -25,7 +38,9 @@ fn hwmon() -> Option<PathBuf> {
         .filter_map(|e| Some((read_trim(&e.path().join("name"))?, e.path())))
         .collect();
     for want in HWMON_CHIPS {
-        let Some((_, dir)) = chips.iter().find(|(name, _)| name == want) else { continue };
+        let Some((_, dir)) = chips.iter().find(|(name, _)| name == want) else {
+            continue;
+        };
         let mut inputs: Vec<PathBuf> = fs::read_dir(dir)
             .ok()?
             .flatten()
@@ -39,9 +54,8 @@ fn hwmon() -> Option<PathBuf> {
         inputs.sort();
         for label in LABELS {
             for input in &inputs {
-                let label_path = input.with_file_name(
-                    input.file_name()?.to_str()?.replace("_input", "_label"),
-                );
+                let label_path =
+                    input.with_file_name(input.file_name()?.to_str()?.replace("_input", "_label"));
                 if read_trim(&label_path).as_deref() == Some(label) {
                     return Some(input.clone());
                 }
@@ -61,9 +75,12 @@ fn thermal_zone() -> Option<PathBuf> {
         .filter(|e| e.file_name().to_string_lossy().starts_with("thermal_zone"))
         .filter_map(|e| Some((read_trim(&e.path().join("type"))?, e.path().join("temp"))))
         .collect();
-    ZONE_TYPES
-        .iter()
-        .find_map(|want| zones.iter().find(|(t, _)| t == want).map(|(_, p)| p.clone()))
+    ZONE_TYPES.iter().find_map(|want| {
+        zones
+            .iter()
+            .find(|(t, _)| t == want)
+            .map(|(_, p)| p.clone())
+    })
 }
 
 /// Finds the most likely CPU temperature input file.

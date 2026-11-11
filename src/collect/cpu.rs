@@ -31,7 +31,10 @@ fn parse(stat: &str) -> Vec<Times> {
             let get = |i: usize| f.get(i).copied().unwrap_or(0);
             // guest time is already included in user/nice.
             let total = (0..8).map(get).sum();
-            Times { idle: get(3) + get(4), total }
+            Times {
+                idle: get(3) + get(4),
+                total,
+            }
         })
         .collect()
 }
@@ -42,7 +45,9 @@ pub struct CpuState {
 
 impl CpuState {
     pub fn new() -> Self {
-        Self { prev: parse(&super::read("/proc/stat")) }
+        Self {
+            prev: parse(&super::read("/proc/stat")),
+        }
     }
 
     /// Returns overall usage and per-core usage in percent since the previous call.

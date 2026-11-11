@@ -21,7 +21,9 @@ fn parse(text: &str) -> Memory {
     let (mut free, mut buffers, mut cached, mut sreclaimable, mut swap_free) = (0, 0, 0, 0, 0);
     let mut available = None;
     for line in text.lines() {
-        let Some((key, rest)) = line.split_once(':') else { continue };
+        let Some((key, rest)) = line.split_once(':') else {
+            continue;
+        };
         let kb: u64 = rest.trim().trim_end_matches(" kB").parse().unwrap_or(0);
         let bytes = kb * 1024;
         match key {

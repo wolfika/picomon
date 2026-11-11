@@ -3,6 +3,7 @@
 use std::convert::Infallible;
 use std::sync::Arc;
 
+use axum::Router;
 use axum::body::Body;
 use axum::extract::{Request, State};
 use axum::http::{HeaderValue, StatusCode, Uri, header};
@@ -10,7 +11,6 @@ use axum::middleware::{self, Next};
 use axum::response::sse::{Event, KeepAlive, Sse};
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
-use axum::Router;
 use base64::Engine;
 use rust_embed::RustEmbed;
 use serde::Serialize;
@@ -57,7 +57,11 @@ pub fn router(cfg: &Config, hub: Arc<Hub>, host: &HostInfo) -> Router {
     })
     .expect("serializing meta");
 
-    let app = App { hub, meta: meta.into(), index: render_index(cfg, title).map(Into::into) };
+    let app = App {
+        hub,
+        meta: meta.into(),
+        index: render_index(cfg, title).map(Into::into),
+    };
 
     let mut router = Router::new()
         .route("/api/stream", get(stream))
@@ -70,7 +74,10 @@ pub fn router(cfg: &Config, hub: Arc<Hub>, host: &HostInfo) -> Router {
             "Basic {}",
             base64::engine::general_purpose::STANDARD.encode(format!("{user}:{pass}"))
         );
-        router = router.layer(middleware::from_fn_with_state(Arc::<str>::from(expected), basic_auth));
+        router = router.layer(middleware::from_fn_with_state(
+            Arc::<str>::from(expected),
+            basic_auth,
+        ));
     }
     router
 }
@@ -88,13 +95,24 @@ fn render_index(cfg: &Config, title: &str) -> Option<String> {
         style.push_str("}</style>");
     }
     Some(
-        html.replacen("data-theme=\"glass\"", &format!("data-theme=\"{}\"", cfg.theme.preset), 1)
-            .replacen("<title>Picomon</title>", &format!("<title>{}</title>{style}", escape_html(title)), 1),
+        html.replacen(
+            "data-theme=\"glass\"",
+            &format!("data-theme=\"{}\"", cfg.theme.preset),
+            1,
+        )
+        .replacen(
+            "<title>Picomon</title>",
+            &format!("<title>{}</title>{style}", escape_html(title)),
+            1,
+        ),
     )
 }
 
 fn escape_html(s: &str) -> String {
-    s.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;").replace('"', "&quot;")
+    s.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
 }
 
 async fn stream(State(app): State<App>) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
@@ -110,14 +128,20 @@ async fn stream(State(app): State<App>) -> Sse<impl Stream<Item = Result<Event, 
     );
     let first = tokio_stream::once(Ok(Event::default().event("init").data(init)));
     // Lagged receivers skip the missed samples.
-    let rest = BroadcastStream::new(rx)
-        .filter_map(|r| r.ok().map(|json| Ok(Event::default().event("sample").data(&*json))));
+    let rest = BroadcastStream::new(rx).filter_map(|r| {
+        r.ok()
+            .map(|json| Ok(Event::default().event("sample").data(&*json)))
+    });
     Sse::new(first.chain(rest)).keep_alive(KeepAlive::default())
 }
 
 async fn sample(State(app): State<App>) -> Response {
     match app.hub.latest() {
-        Some(json) => ([(header::CONTENT_TYPE, "application/json")], json.to_string()).into_response(),
+        Some(json) => (
+            [(header::CONTENT_TYPE, "application/json")],
+            json.to_string(),
+        )
+            .into_response(),
         None => StatusCode::SERVICE_UNAVAILABLE.into_response(),
     }
 }
@@ -173,8 +197,10 @@ async fn basic_auth(State(expected): State<Arc<str>>, req: Request, next: Next) 
         return next.run(req).await;
     }
     let mut res = StatusCode::UNAUTHORIZED.into_response();
-    res.headers_mut()
-        .insert(header::WWW_AUTHENTICATE, HeaderValue::from_static("Basic realm=\"picomon\", charset=\"UTF-8\""));
+    res.headers_mut().insert(
+        header::WWW_AUTHENTICATE,
+        HeaderValue::from_static("Basic realm=\"picomon\", charset=\"UTF-8\""),
+    );
     res
 }
 

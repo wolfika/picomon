@@ -14,7 +14,10 @@ pub fn unit(exe: &str) -> String {
 /// specifier, so it is doubled; whitespace, quotes and backslashes need quoting.
 fn quote(path: &str) -> String {
     let path = path.replace('%', "%%");
-    if path.chars().any(|c| c.is_whitespace() || matches!(c, '"' | '\'' | '\\')) {
+    if path
+        .chars()
+        .any(|c| c.is_whitespace() || matches!(c, '"' | '\'' | '\\'))
+    {
         format!("\"{}\"", path.replace('\\', "\\\\").replace('"', "\\\""))
     } else {
         path

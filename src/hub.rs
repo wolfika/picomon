@@ -26,7 +26,10 @@ impl Hub {
     pub fn new(capacity: usize) -> Self {
         let (tx, _) = broadcast::channel(16);
         Self {
-            state: Mutex::new(State { history: VecDeque::with_capacity(capacity), latest: None }),
+            state: Mutex::new(State {
+                history: VecDeque::with_capacity(capacity),
+                latest: None,
+            }),
             capacity,
             tx,
         }
@@ -68,7 +71,10 @@ impl Hub {
         let points: Vec<Point> = st.history.iter().copied().collect();
         let latest = st.latest.clone();
         drop(st);
-        (serde_json::to_string(&points).unwrap_or_else(|_| "[]".into()), latest)
+        (
+            serde_json::to_string(&points).unwrap_or_else(|_| "[]".into()),
+            latest,
+        )
     }
 }
 
