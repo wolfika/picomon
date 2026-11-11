@@ -4,7 +4,7 @@
   import Memory from './cards/Memory.svelte';
   import Network from './cards/Network.svelte';
   import Temp from './cards/Temp.svelte';
-  import { clock, duration } from './lib/format';
+  import { duration } from './lib/format';
   import { live } from './lib/stream.svelte';
   import ThemeMenu from './lib/ThemeMenu.svelte';
 
@@ -65,11 +65,6 @@
       <Network {meta} {sample} {history} class={hasTemp ? 'wide' : 'wide full'} />
       <Disks {meta} {sample} {history} />
     </main>
-    <footer class="foot dots">
-      <span>Picomon</span>
-      <span>every {meta.interval}s</span>
-      <span>updated {clock(sample.t)}</span>
-    </footer>
   {:else}
     <p class="empty muted">Waiting for the first sample…</p>
   {/if}

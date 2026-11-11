@@ -166,13 +166,6 @@ body {
   text-align: center;
 }
 
-.foot {
-  justify-content: center;
-  margin-top: 24px;
-  font-size: 12px;
-  color: var(--faint);
-}
-
 /* Shared card content. */
 
 .muted {
