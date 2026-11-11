@@ -119,12 +119,9 @@ Viewers can switch theme from the menu button in the page header. The choice is 
 | `GET /api/sample` | Latest sample as JSON                                                                              |
 | `GET /api/stream` | Server-Sent Events. An `init` event with host info and history, then a `sample` event per interval |
 
-## Development
+## Contributing
 
-```sh
-make dev     # backend on :7340, Vite with hot reload on :5173
-make test    # Rust tests and Svelte type check
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, commit conventions and the release process.
 
 ## License
 
