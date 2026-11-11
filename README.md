@@ -1,8 +1,8 @@
 # Picomon
 
-Self-hosted monitor for a single Linux server, with a web dashboard. One binary, about 1.3 MB, using about 3 MB of RAM.
+Lightweight self-hosted monitor for a single Linux server, with a web dashboard. One binary, about 1.3 MB, using about 3 MB of RAM. Low resource footprint, ideal for personal servers, such as a Raspberry Pi.
 
-It shows:
+Metrics:
 
 - CPU usage, per-core usage and load average
 - CPU temperature
@@ -35,39 +35,7 @@ Picomon reads its config from, in order:
 2. `$PICOMON_CONFIG`
 3. `/etc/picomon/config.toml`, if it exists
 
-With no config file, defaults are used. `picomon --print-config` prints the annotated defaults:
-
-```toml
-[server]
-listen = "0.0.0.0:7340"
-# title = "my-server"          # defaults to the hostname
-
-[auth]
-# username = "admin"
-# password = "change-me"
-
-[collector]
-interval = 2.0                 # seconds between samples
-history = 10.0                 # minutes kept in memory
-
-[cpu]
-# temp_sensor = "/sys/class/hwmon/hwmon2/temp1_input"
-
-[disks]
-mounts = []                    # empty: all physical filesystems
-
-[network]
-include = []                   # empty: all except `exclude`
-exclude = ["lo", "veth*", "docker*", "br-*", "virbr*", "cni*", "flannel*"]
-
-[theme]
-preset = "glass"               # glass, dark, light, nord
-
-[theme.colors]
-# accent = "#7aa2f7"
-```
-
-Unknown keys are rejected at startup.
+With no config file, defaults are used. `picomon --print-config` prints the annotated defaults. Unknown keys are rejected at startup.
 
 ### Authentication
 
@@ -83,23 +51,23 @@ The sensor is detected from hwmon (`coretemp`, `k10temp`, `zenpower`, `cpu_therm
 
 `theme.preset` selects a built-in theme. `glass` is the default. `[theme.colors]` overrides any theme variable; keys are CSS variable names without the leading `--`:
 
-| Variable | Used for |
-|---|---|
-| `bg`, `bg-image` | Page background |
-| `surface`, `border`, `shadow`, `blur`, `radius` | Cards |
-| `text`, `muted` | Text |
-| `grid`, `tooltip` | Chart axes and tooltip |
-| `accent` | Single-series charts and meters |
-| `series-1`, `series-2` | Two-series charts (download/upload, read/write) |
-| `ok`, `warn`, `crit` | Status colours |
+| Variable                                        | Used for                                        |
+| ----------------------------------------------- | ----------------------------------------------- |
+| `bg`, `bg-image`                                | Page background                                 |
+| `surface`, `border`, `shadow`, `blur`, `radius` | Cards                                           |
+| `text`, `muted`                                 | Text                                            |
+| `grid`, `tooltip`                               | Chart axes and tooltip                          |
+| `accent`                                        | Single-series charts and meters                 |
+| `series-1`, `series-2`                          | Two-series charts (download/upload, read/write) |
+| `ok`, `warn`, `crit`                            | Status colours                                  |
 
 Viewers can switch theme from the menu button in the page header. The choice is stored in their browser.
 
 ## API
 
-| Endpoint | Description |
-|---|---|
-| `GET /api/sample` | Latest sample as JSON |
+| Endpoint          | Description                                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------------- |
+| `GET /api/sample` | Latest sample as JSON                                                                              |
 | `GET /api/stream` | Server-Sent Events. An `init` event with host info and history, then a `sample` event per interval |
 
 ## Development
