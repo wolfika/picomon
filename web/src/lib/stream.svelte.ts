@@ -42,7 +42,9 @@ class Live {
       this.sample = s;
       const cap = this.meta?.history_len ?? 0;
       if (cap > 0) {
-        const h = this.history.length >= cap ? this.history.slice(1 - cap) : this.history.slice();
+        // Keep the newest cap - 1 points, then append. (slice(1 - cap) would keep
+        // everything when cap is 1.)
+        const h = this.history.slice(Math.max(0, this.history.length - cap + 1));
         h.push(toPoint(s));
         this.history = h;
       }
