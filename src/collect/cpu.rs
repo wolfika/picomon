@@ -11,7 +11,8 @@ impl Times {
         if total == 0 {
             0.0
         } else {
-            (100.0 * (total - idle.min(total)) as f64 / total as f64) as f32
+            // One decimal is enough for display and keeps the JSON small.
+            ((1000.0 * (total - idle.min(total)) as f64 / total as f64).round() / 10.0) as f32
         }
     }
 }

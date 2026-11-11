@@ -140,9 +140,9 @@ fn read(path: impl AsRef<std::path::Path>) -> String {
     std::fs::read_to_string(path).unwrap_or_default()
 }
 
-/// Computes a per-second rate, treating counter resets as zero.
+/// Computes a whole per-second rate, treating counter resets as zero.
 fn rate(now: u64, prev: u64, secs: f64) -> f64 {
-    if secs <= 0.0 { 0.0 } else { now.saturating_sub(prev) as f64 / secs }
+    if secs <= 0.0 { 0.0 } else { (now.saturating_sub(prev) as f64 / secs).round() }
 }
 
 #[cfg(test)]
