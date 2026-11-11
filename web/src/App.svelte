@@ -19,7 +19,7 @@
       <div class="brand">
         <svg viewBox="0 0 32 32" width="20" height="20" aria-hidden="true">
           <rect width="32" height="32" rx="8" fill="var(--accent)" />
-          <path d="M5 18h5l3-8 5 14 3-6h6" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M5 18h5l3-8 5 14 3-6h6" fill="none" style:stroke="var(--on-accent, #fff)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
         Picomon
       </div>

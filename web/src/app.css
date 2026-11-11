@@ -108,6 +108,123 @@
   --crit: #bf616a;
 }
 
+/*
+ * Catppuccin (https://catppuccin.com/palette/), following its style guide:
+ * Crust behind the panes, Base for panes, Surface 0 for borders, Text /
+ * Subtext 0 / Overlay 1 for text tiers, Green / Yellow / Red for status and
+ * Mauve as the accent. Latte uses Overlay 2 for faint text, since Overlay 1 is
+ * under 3:1 on Base. Pink, Peach and Yellow are also under 3:1 on Latte, so
+ * every value they colour is printed as text as well.
+ */
+
+/* Catppuccin Latte */
+[data-theme='catppuccin-latte'] {
+  color-scheme: light;
+  --bg: #dce0e8; /* Crust */
+  --bg-image: none;
+  --surface: #eff1f5; /* Base */
+  --hero: linear-gradient(120deg, rgb(136 57 239 / 0.1), transparent 60%); /* Mauve tint */
+  --border: #ccd0da; /* Surface 0 */
+  --shadow: 0 1px 2px rgb(76 79 105 / 0.06), 0 4px 16px rgb(76 79 105 / 0.04);
+  --blur: none;
+  --radius: 12px;
+  --text: #4c4f69; /* Text */
+  --muted: #6c6f85; /* Subtext 0 */
+  --faint: #7c7f93; /* Overlay 2 */
+  --grid: #ccd0da; /* Surface 0 */
+  --tooltip: #e6e9ef; /* Mantle */
+  --accent: #8839ef; /* Mauve */
+  --on-accent: #eff1f5; /* Base, per the style guide */
+  --cpu: #8839ef; /* Mauve */
+  --mem: #ea76cb; /* Pink */
+  --series-1: #1e66f5; /* Blue */
+  --series-2: #fe640b; /* Peach */
+  --ok: #40a02b; /* Green */
+  --warn: #df8e1d; /* Yellow */
+  --crit: #d20f39; /* Red */
+}
+
+/* Catppuccin Frappé */
+[data-theme='catppuccin-frappe'] {
+  color-scheme: dark;
+  --bg: #232634; /* Crust */
+  --bg-image: none;
+  --surface: #303446; /* Base */
+  --hero: linear-gradient(120deg, rgb(202 158 230 / 0.12), transparent 60%); /* Mauve tint */
+  --border: #414559; /* Surface 0 */
+  --shadow: none;
+  --blur: none;
+  --radius: 12px;
+  --text: #c6d0f5; /* Text */
+  --muted: #a5adce; /* Subtext 0 */
+  --faint: #838ba7; /* Overlay 1 */
+  --grid: #414559; /* Surface 0 */
+  --tooltip: #292c3c; /* Mantle */
+  --accent: #ca9ee6; /* Mauve */
+  --on-accent: #303446; /* Base, per the style guide */
+  --cpu: #ca9ee6; /* Mauve */
+  --mem: #f4b8e4; /* Pink */
+  --series-1: #8caaee; /* Blue */
+  --series-2: #ef9f76; /* Peach */
+  --ok: #a6d189; /* Green */
+  --warn: #e5c890; /* Yellow */
+  --crit: #e78284; /* Red */
+}
+
+/* Catppuccin Macchiato */
+[data-theme='catppuccin-macchiato'] {
+  color-scheme: dark;
+  --bg: #181926; /* Crust */
+  --bg-image: none;
+  --surface: #24273a; /* Base */
+  --hero: linear-gradient(120deg, rgb(198 160 246 / 0.12), transparent 60%); /* Mauve tint */
+  --border: #363a4f; /* Surface 0 */
+  --shadow: none;
+  --blur: none;
+  --radius: 12px;
+  --text: #cad3f5; /* Text */
+  --muted: #a5adcb; /* Subtext 0 */
+  --faint: #8087a2; /* Overlay 1 */
+  --grid: #363a4f; /* Surface 0 */
+  --tooltip: #1e2030; /* Mantle */
+  --accent: #c6a0f6; /* Mauve */
+  --on-accent: #24273a; /* Base, per the style guide */
+  --cpu: #c6a0f6; /* Mauve */
+  --mem: #f5bde6; /* Pink */
+  --series-1: #8aadf4; /* Blue */
+  --series-2: #f5a97f; /* Peach */
+  --ok: #a6da95; /* Green */
+  --warn: #eed49f; /* Yellow */
+  --crit: #ed8796; /* Red */
+}
+
+/* Catppuccin Mocha */
+[data-theme='catppuccin-mocha'] {
+  color-scheme: dark;
+  --bg: #11111b; /* Crust */
+  --bg-image: none;
+  --surface: #1e1e2e; /* Base */
+  --hero: linear-gradient(120deg, rgb(203 166 247 / 0.12), transparent 60%); /* Mauve tint */
+  --border: #313244; /* Surface 0 */
+  --shadow: none;
+  --blur: none;
+  --radius: 12px;
+  --text: #cdd6f4; /* Text */
+  --muted: #a6adc8; /* Subtext 0 */
+  --faint: #7f849c; /* Overlay 1 */
+  --grid: #313244; /* Surface 0 */
+  --tooltip: #181825; /* Mantle */
+  --accent: #cba6f7; /* Mauve */
+  --on-accent: #1e1e2e; /* Base, per the style guide */
+  --cpu: #cba6f7; /* Mauve */
+  --mem: #f5c2e7; /* Pink */
+  --series-1: #89b4fa; /* Blue */
+  --series-2: #fab387; /* Peach */
+  --ok: #a6e3a1; /* Green */
+  --warn: #f9e2af; /* Yellow */
+  --crit: #f38ba8; /* Red */
+}
+
 *,
 *::before,
 *::after {

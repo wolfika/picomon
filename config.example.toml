@@ -34,7 +34,8 @@ include = []
 exclude = ["lo", "veth*", "docker*", "br-*", "virbr*", "cni*", "flannel*"]
 
 [theme]
-# One of: glass, dark, light, nord.
+# One of: glass, dark, light, nord, catppuccin-latte, catppuccin-frappe,
+# catppuccin-macchiato, catppuccin-mocha.
 preset = "glass"
 
 # Override any theme variable. Keys are CSS variable names without `--`.

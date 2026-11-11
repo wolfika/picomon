@@ -1,5 +1,30 @@
 // Keep in sync with THEME_PRESETS in src/config.rs and the selectors in app.css.
-export const THEMES = ['glass', 'dark', 'light', 'nord'] as const;
+export const THEMES = [
+  'glass',
+  'dark',
+  'light',
+  'nord',
+  'catppuccin-latte',
+  'catppuccin-frappe',
+  'catppuccin-macchiato',
+  'catppuccin-mocha',
+] as const;
+
+const LABELS: Record<string, string> = {
+  glass: 'Glass',
+  dark: 'Dark',
+  light: 'Light',
+  nord: 'Nord',
+  'catppuccin-latte': 'Catppuccin Latte',
+  'catppuccin-frappe': 'Catppuccin Frappé',
+  'catppuccin-macchiato': 'Catppuccin Macchiato',
+  'catppuccin-mocha': 'Catppuccin Mocha',
+};
+
+/** Display name for a preset id. */
+export function themeLabel(id: string): string {
+  return LABELS[id] ?? id;
+}
 
 const KEY = 'picomon-theme';
 const root = document.documentElement;

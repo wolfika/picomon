@@ -1,6 +1,6 @@
 <script lang="ts">
   import { tick } from 'svelte';
-  import { THEMES, serverTheme, setTheme } from './theme';
+  import { THEMES, serverTheme, setTheme, themeLabel } from './theme';
 
   let current = $state(document.documentElement.dataset.theme ?? serverTheme);
   let open = $state(false);
@@ -90,7 +90,7 @@
         >
           <!-- The swatch carries its own data-theme, so it previews that preset's colours. -->
           <span class="swatch" data-theme={t} aria-hidden="true"><i></i></span>
-          <span class="name">{t}</span>
+          <span class="name">{themeLabel(t)}</span>
           {#if t === serverTheme}<span class="hint">default</span>{/if}
           <svg class="check" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
             <path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -133,7 +133,7 @@
     top: calc(100% + 8px);
     right: 0;
     z-index: 10;
-    min-width: 180px;
+    min-width: 220px;
     padding: 6px;
     border-radius: 12px;
     border: 1px solid var(--border);
@@ -178,7 +178,7 @@
     background: var(--accent);
   }
   .name {
-    text-transform: capitalize;
+    white-space: nowrap;
   }
   .hint {
     font-size: 11px;

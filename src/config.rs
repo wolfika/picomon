@@ -117,7 +117,16 @@ impl Default for Theme {
 /// connect, about 100 bytes of JSON per point, so this caps that at about 1 MB.
 pub const MAX_HISTORY_POINTS: usize = 10_000;
 
-pub const THEME_PRESETS: &[&str] = &["glass", "dark", "light", "nord"];
+pub const THEME_PRESETS: &[&str] = &[
+    "glass",
+    "dark",
+    "light",
+    "nord",
+    "catppuccin-latte",
+    "catppuccin-frappe",
+    "catppuccin-macchiato",
+    "catppuccin-mocha",
+];
 
 impl Config {
     pub fn load(path: Option<&Path>) -> Result<Self, String> {
