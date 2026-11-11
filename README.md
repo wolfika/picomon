@@ -2,6 +2,8 @@
 
 Lightweight self-hosted monitor for a single Linux server, with a web dashboard. One binary, about 1.3 MB, using about 3 MB of RAM. Low resource footprint, ideal for personal servers, such as a Raspberry Pi.
 
+![Picomon dashboard on a Raspberry Pi, showing CPU, temperature, memory, network and storage cards in the glass theme](docs/screenshot.png)
+
 Metrics:
 
 - CPU usage, per-core usage and load average
