@@ -1,8 +1,11 @@
 mod collect;
 mod config;
+mod hub;
+mod server;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
+use std::sync::Arc;
 
 use config::Config;
 
@@ -78,6 +81,50 @@ fn main() -> ExitCode {
         Some(p) => eprintln!("picomon: loaded config from {}", p.display()),
         None => eprintln!("picomon: no config file, using defaults"),
     }
-    let _ = cfg;
-    ExitCode::SUCCESS
+
+    let host = collect::HostInfo::read();
+    let collector = collect::Collector::new(&cfg);
+    match collector.temp_path() {
+        Some(p) => eprintln!("picomon: CPU temperature from {}", p.display()),
+        None => eprintln!("picomon: no CPU temperature sensor found"),
+    }
+    let hub = Arc::new(hub::Hub::new(cfg.collector.history_len()));
+    hub::spawn_collector(hub.clone(), collector, cfg.collector.interval());
+    let app = server::router(&cfg, hub, &host);
+
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .expect("building tokio runtime");
+    rt.block_on(async {
+        let listener = match tokio::net::TcpListener::bind(&cfg.server.listen).await {
+            Ok(l) => l,
+            Err(e) => {
+                eprintln!("picomon: binding {}: {e}", cfg.server.listen);
+                return ExitCode::FAILURE;
+            }
+        };
+        eprintln!("picomon: listening on http://{}", cfg.server.listen);
+        // SSE streams never end on their own, so exit directly on a signal
+        // instead of waiting for connections to drain. There is no state to flush.
+        tokio::select! {
+            r = axum::serve(listener, app) => {
+                if let Err(e) = r {
+                    eprintln!("picomon: server error: {e}");
+                    return ExitCode::FAILURE;
+                }
+            }
+            _ = shutdown() => eprintln!("picomon: shutting down"),
+        }
+        ExitCode::SUCCESS
+    })
+}
+
+async fn shutdown() {
+    use tokio::signal::unix::{SignalKind, signal};
+    let mut term = signal(SignalKind::terminate()).expect("installing SIGTERM handler");
+    tokio::select! {
+        _ = tokio::signal::ctrl_c() => {}
+        _ = term.recv() => {}
+    }
 }
