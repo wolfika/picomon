@@ -93,7 +93,7 @@ The sensor is detected from hwmon (`coretemp`, `k10temp`, `zenpower`, `cpu_therm
 | `series-1`, `series-2` | Two-series charts (download/upload, read/write) |
 | `ok`, `warn`, `crit` | Status colours |
 
-Viewers can switch theme from the page footer. The choice is stored in their browser.
+Viewers can switch theme from the menu button in the page header. The choice is stored in their browser.
 
 ## API
 
