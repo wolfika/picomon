@@ -1,0 +1,42 @@
+# Picomon configuration.
+# Every key is optional; the values below are the defaults.
+
+[server]
+# Address and port to listen on. Use 127.0.0.1 to allow local access only.
+listen = "0.0.0.0:7340"
+# Page title. Defaults to the hostname.
+# title = "my-server"
+
+[auth]
+# HTTP basic auth. Set both to enable. Protect this file (chmod 600).
+# username = "admin"
+# password = "change-me"
+
+[collector]
+# Seconds between samples.
+interval = 2.0
+# Minutes of history kept in memory for charts.
+history = 10.0
+
+[cpu]
+# Temperature input file. Auto-detected when unset.
+# temp_sensor = "/sys/class/hwmon/hwmon2/temp1_input"
+
+[disks]
+# Mount points to show. Empty shows all physical filesystems.
+mounts = []
+
+[network]
+# Interfaces to show. Empty shows all interfaces not matched by `exclude`.
+include = []
+# A trailing `*` matches any suffix.
+exclude = ["lo", "veth*", "docker*", "br-*", "virbr*", "cni*", "flannel*"]
+
+[theme]
+# One of: glass, dark, light, nord.
+preset = "glass"
+
+# Override any theme variable. Keys are CSS variable names without `--`.
+[theme.colors]
+# accent = "#7aa2f7"
+# bg = "#0b1020"
