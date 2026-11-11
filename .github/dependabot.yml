@@ -1,0 +1,33 @@
+# Weekly update PRs, one per ecosystem. Prefixes keep them out of releases;
+# a dependency change that matters to users can be released with a fix commit.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci(deps)
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: build(deps)
+    groups:
+      cargo:
+        patterns: ["*"]
+
+  - package-ecosystem: bun
+    directory: /web
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: build(deps)
+    groups:
+      web:
+        patterns: ["*"]
