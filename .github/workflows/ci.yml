@@ -1,0 +1,51 @@
+# Checks for pull requests. The release workflow also calls this before
+# release-please, so pushes to main are checked once and a release is only
+# cut from a commit that passed.
+
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bunx biome ci .
+      - run: bun run check
+      - run: bun run build
+
+  # The armv7 release target is 32-bit, which x86_64 tests cannot cover.
+  # cross runs the test binary under QEMU. No Rust cache here: build scripts
+  # compiled on the runner do not run inside the cross container.
+  test-armv7:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cross
+      - run: cross test --target armv7-unknown-linux-musleabihf
