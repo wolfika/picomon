@@ -113,6 +113,10 @@ impl Default for Theme {
     }
 }
 
+/// Upper bound on history points. Each SSE client receives the full history on
+/// connect, about 100 bytes of JSON per point, so this caps that at about 1 MB.
+pub const MAX_HISTORY_POINTS: usize = 10_000;
+
 pub const THEME_PRESETS: &[&str] = &["glass", "dark", "light", "nord"];
 
 impl Config {
@@ -136,6 +140,13 @@ impl Config {
         }
         if !(c.history >= 0.0 && c.history <= 1440.0) {
             return Err("collector.history must be between 0 and 1440 minutes".into());
+        }
+        if c.history_len() > MAX_HISTORY_POINTS {
+            return Err(format!(
+                "collector.history / collector.interval gives {} samples; the maximum is {MAX_HISTORY_POINTS}. \
+                 Raise collector.interval or lower collector.history",
+                c.history_len()
+            ));
         }
         if self.auth.username.is_some() != self.auth.password.is_some() {
             return Err("auth.username and auth.password must be set together".into());
@@ -190,5 +201,13 @@ mod tests {
     fn history_len() {
         let c = Collector { interval: 2.0, history: 10.0 };
         assert_eq!(c.history_len(), 300);
+    }
+
+    #[test]
+    fn rejects_oversized_history() {
+        let cfg: Config = toml::from_str("[collector]\ninterval = 0.25\nhistory = 1440.0").unwrap();
+        assert!(cfg.validate().unwrap_err().contains("345600 samples"));
+        let cfg: Config = toml::from_str("[collector]\ninterval = 10.0\nhistory = 1440.0").unwrap();
+        assert!(cfg.validate().is_ok());
     }
 }

@@ -15,7 +15,8 @@ listen = "0.0.0.0:7340"
 [collector]
 # Seconds between samples.
 interval = 2.0
-# Minutes of history kept in memory for charts.
+# Minutes of history kept in memory for charts. history / interval may be at
+# most 10000 samples, e.g. 24 hours needs an interval of 9 seconds or more.
 history = 10.0
 
 [cpu]
