@@ -1,0 +1,31 @@
+[Unit]
+Description=Picomon server monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# The config may hold a password, so it stays root-only (mode 600) and is
+# passed to the unprivileged dynamic user as a credential.
+LoadCredential=config.toml:/etc/picomon/config.toml
+ExecStart=/usr/local/bin/picomon --config ${CREDENTIALS_DIRECTORY}/config.toml
+Restart=on-failure
+DynamicUser=yes
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+# Read-only rather than hidden, so disk usage of mounts under /home stays visible.
+ProtectHome=read-only
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target
