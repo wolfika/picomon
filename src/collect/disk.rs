@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::ffi::CString;
 use std::path::Path;
 
@@ -115,44 +116,56 @@ pub fn usage(configured: &[String]) -> Vec<Disk> {
         .collect()
 }
 
-/// Sums sectors read and written over physical block devices.
-fn io_totals() -> (u64, u64) {
-    let mut read = 0;
-    let mut write = 0;
-    for line in super::read("/proc/diskstats").lines() {
-        let f: Vec<&str> = line.split_ascii_whitespace().collect();
-        if f.len() < 10 {
-            continue;
-        }
-        // Whole disks backed by hardware have /sys/block/<name>/device; this skips
-        // partitions, loop, ram, zram, dm and md devices, which would double count.
-        if !Path::new("/sys/block").join(f[2]).join("device").exists() {
-            continue;
-        }
-        // Sectors are always 512 bytes in /proc/diskstats.
-        read += f[5].parse::<u64>().unwrap_or(0) * 512;
-        write += f[9].parse::<u64>().unwrap_or(0) * 512;
-    }
-    (read, write)
+/// Cumulative bytes (read, written) per device name.
+type IoCounters = HashMap<String, (u64, u64)>;
+
+/// Parses /proc/diskstats, keeping devices accepted by `physical`.
+fn parse_diskstats(text: &str, physical: impl Fn(&str) -> bool) -> IoCounters {
+    text.lines()
+        .filter_map(|line| {
+            let f: Vec<&str> = line.split_ascii_whitespace().collect();
+            if f.len() < 10 || !physical(f[2]) {
+                return None;
+            }
+            // Sectors are always 512 bytes in /proc/diskstats.
+            let read = f[5].parse::<u64>().unwrap_or(0) * 512;
+            let write = f[9].parse::<u64>().unwrap_or(0) * 512;
+            Some((f[2].to_string(), (read, write)))
+        })
+        .collect()
+}
+
+fn io_counters() -> IoCounters {
+    // Whole disks backed by hardware have /sys/block/<name>/device; this skips
+    // partitions, loop, ram, zram, dm and md devices, which would double count.
+    parse_diskstats(&super::read("/proc/diskstats"), |name| {
+        Path::new("/sys/block").join(name).join("device").exists()
+    })
+}
+
+/// Sums per-device byte deltas. A device without a previous reading (just
+/// plugged in) contributes nothing, rather than its whole lifetime total.
+fn io_delta(prev: &IoCounters, now: &IoCounters) -> (u64, u64) {
+    now.iter().fold((0, 0), |(r, w), (name, &(nr, nw))| match prev.get(name) {
+        Some(&(pr, pw)) => (r + nr.saturating_sub(pr), w + nw.saturating_sub(pw)),
+        None => (r, w),
+    })
 }
 
 pub struct IoState {
-    prev: (u64, u64),
+    prev: IoCounters,
 }
 
 impl IoState {
     pub fn new() -> Self {
-        Self { prev: io_totals() }
+        Self { prev: io_counters() }
     }
 
     pub fn sample(&mut self, secs: f64) -> Rate {
-        let now = io_totals();
-        let r = Rate {
-            read: super::rate(now.0, self.prev.0, secs),
-            write: super::rate(now.1, self.prev.1, secs),
-        };
+        let now = io_counters();
+        let (read, write) = io_delta(&self.prev, &now);
         self.prev = now;
-        r
+        Rate { read: super::rate(read, 0, secs), write: super::rate(write, 0, secs) }
     }
 }
 
@@ -180,5 +193,24 @@ mod tests {
         ]);
         let mounts: Vec<&str> = got.iter().map(|m| m.mount.as_str()).collect();
         assert_eq!(mounts, ["/", "/data"]);
+    }
+
+    #[test]
+    fn new_device_does_not_spike_io() {
+        let stats = |sda: u64, sdb: Option<u64>| {
+            let mut t = format!("   8 0 sda 0 0 {sda} 0 0 0 {sda} 0 0 0 0\n");
+            if let Some(b) = sdb {
+                t += &format!("   8 16 sdb 0 0 {b} 0 0 0 {b} 0 0 0 0\n");
+            }
+            t += "   8 1 sda1 0 0 999 0 0 0 999 0 0 0 0\n";
+            parse_diskstats(&t, |n| n.starts_with("sd") && n.len() == 3)
+        };
+        let before = stats(100, None);
+        // sdb appears with a large lifetime total; only sda's 10 new sectors count.
+        let after = stats(110, Some(1_000_000));
+        assert_eq!(io_delta(&before, &after), (10 * 512, 10 * 512));
+        // From then on sdb is counted normally.
+        let later = stats(110, Some(1_000_002));
+        assert_eq!(io_delta(&after, &later), (2 * 512, 2 * 512));
     }
 }
