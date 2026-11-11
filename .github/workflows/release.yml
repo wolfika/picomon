@@ -1,0 +1,81 @@
+# Releases are driven by release-please. On every push to main it opens or
+# updates a release PR from the conventional commits since the last release.
+# Merging that PR tags the release, and the jobs below then attach static
+# binaries and checksums to it.
+#
+# Everything runs in this one workflow because a tag or release created with
+# GITHUB_TOKEN does not trigger other workflows.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      created: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v4
+
+  build:
+    needs: release-please
+    if: needs.release-please.outputs.created == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            asset: picomon-linux-x86_64
+          - target: aarch64-unknown-linux-musl
+            asset: picomon-linux-aarch64
+          - target: armv7-unknown-linux-musleabihf
+            asset: picomon-linux-armv7
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.release-please.outputs.tag }}
+
+      # The frontend is embedded at compile time and is the same for every target.
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+        working-directory: web
+      - run: bun run build
+        working-directory: web
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cross
+      # musl targets give fully static binaries that run on any distribution.
+      - run: cross build --release --target ${{ matrix.target }}
+      - run: cp target/${{ matrix.target }}/release/picomon ${{ matrix.asset }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: ${{ matrix.asset }}
+          if-no-files-found: error
+
+  publish:
+    needs: [release-please, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - run: sha256sum picomon-linux-* > SHA256SUMS
+        working-directory: dist
+      - run: gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release-please.outputs.tag }}
