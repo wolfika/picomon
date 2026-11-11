@@ -6,9 +6,7 @@
   import Temp from './cards/Temp.svelte';
   import { duration } from './lib/format';
   import { live } from './lib/stream.svelte';
-  import { THEMES, serverTheme, setTheme } from './lib/theme';
-
-  let theme = $state(document.documentElement.dataset.theme ?? serverTheme);
+  import ThemeMenu from './lib/ThemeMenu.svelte';
 
   $effect(() => {
     if (live.meta) document.title = live.meta.title;
@@ -31,6 +29,7 @@
       <span class="conn" class:on={live.connected}>
         <i aria-hidden="true"></i>{live.connected ? 'Live' : 'Reconnecting…'}
       </span>
+      <ThemeMenu />
     </div>
   </header>
 
@@ -48,16 +47,4 @@
   {:else}
     <p class="empty muted">Waiting for the first sample…</p>
   {/if}
-
-  <footer class="muted">
-    <span>Picomon</span>
-    <label>
-      Theme
-      <select bind:value={theme} onchange={() => setTheme(theme)}>
-        {#each THEMES as t (t)}
-          <option value={t}>{t}{t === serverTheme ? ' (default)' : ''}</option>
-        {/each}
-      </select>
-    </label>
-  </footer>
 </div>

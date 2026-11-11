@@ -115,7 +115,7 @@ body {
 .page {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 28px 16px 20px;
+  padding: 28px 16px 32px;
 }
 
 .top {
@@ -141,7 +141,7 @@ body {
 .status {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .conn {
@@ -178,28 +178,6 @@ body {
 .empty {
   padding: 64px 0;
   text-align: center;
-}
-
-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 24px;
-  font-size: 12px;
-}
-
-footer select {
-  margin-left: 6px;
-  padding: 3px 6px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
-}
-
-footer option {
-  background: var(--bg);
 }
 
 /* Shared card content. */
