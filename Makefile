@@ -24,7 +24,8 @@ test: web/node_modules
 	cargo test
 	cd web && bun run check
 
-install: build
+install:
+	@[ -f target/release/picomon ] || { echo "target/release/picomon not found. Run 'make build' first." >&2; exit 1; }
 	install -Dm755 target/release/picomon $(DESTDIR)$(PREFIX)/bin/picomon
 	install -Dm644 contrib/picomon.service $(DESTDIR)/etc/systemd/system/picomon.service
 	[ -e $(DESTDIR)/etc/picomon/config.toml ] || \

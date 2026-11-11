@@ -23,6 +23,8 @@ sudo make install          # binary, systemd unit, /etc/picomon/config.toml
 sudo systemctl enable --now picomon
 ```
 
+Run `make build` as the user that has Rust and Bun installed. `make install` only copies the built files and does not need either toolchain.
+
 The dashboard is served at `http://<host>:7340`.
 
 `make install` copies the example config only if `/etc/picomon/config.toml` does not already exist.
