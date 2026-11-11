@@ -29,6 +29,18 @@ The dashboard is served at `http://<host>:7340`.
 
 `make install` copies the example config only if `/etc/picomon/config.toml` does not already exist.
 
+## Update
+
+```sh
+git pull
+make build
+sudo make install
+sudo systemctl daemon-reload       # picks up changes to the unit file
+sudo systemctl restart picomon
+```
+
+If the service fails to start, `journalctl -u picomon -n 20` shows why. A config key that the new version no longer accepts is named there. Compare with `picomon --print-config`.
+
 ## Configuration
 
 Picomon reads its config from, in order:
