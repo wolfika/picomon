@@ -59,8 +59,6 @@ Releases are automated with [release-please](https://github.com/googleapis/relea
 
 To set a version explicitly, for example for 1.0, add a `Release-As: 1.0.0` footer to a commit message.
 
-GitHub Actions needs permission to create pull requests: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
-
 ### When a release build fails
 
 The tag and release exist before the binaries are built, so a failed build leaves a release without assets.
